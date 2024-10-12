@@ -12,9 +12,13 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.2/install.bash")
-# or
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.2/install.bash")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.2/install.sh")
+```
+
+Or alternatively, with `wget`:
+
+```shell
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.2/install.sh")
 ```
 
 The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.2/all.bash`.
