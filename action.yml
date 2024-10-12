@@ -1,0 +1,25 @@
+name: "Release Tools for bash"
+description: "Sources the bash release tools in the targeted workflow."
+author: "Mihai Bojin <mihai.bojin@gmail.com>"
+inputs:
+  version:
+    description: "The version to install, defaults to the latest release"
+    required: false
+    default: "v0.0.4"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install the release tools
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        if command -v curl >/dev/null 2>&1; then
+          eval bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/${VERSION}/install.sh")
+        elif command -v wget >/dev/null 2>&1; then
+          eval bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/${VERSION}/install.sh")
+        else
+          echo "Error: curl or wget are needed to install the script." >&2
+          exit 1
+        fi
