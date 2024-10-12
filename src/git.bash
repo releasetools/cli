@@ -115,8 +115,13 @@ function git::tag_semver() {
     echo "Tagging the HEAD commit with '$version'" >&2
     git tag -s "$version" -m "Release $version" $force_flag
 
+    # Tag the latest major version
+    major="${version%%.*}"
+    git tag -a -m "Release $version" "$major"
+
     # If --push was specified, push the tag to the remote
     if [ "$push_flag" = true ]; then
-        git push origin "$version"
+        git push origin "$version" $force_flag
+        git push origin "$major" $force_flag
     fi
 }

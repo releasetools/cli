@@ -54,5 +54,5 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
   echo "The releasetools module ($VERSION) has been downloaded and verified successfully." >&2
   echo >&2
   echo "You may now use it by sourcing it:" >&2
-  echo ". '$INSTALL_DIR/$NAME'"
 fi
+echo ". '$INSTALL_DIR/$NAME'"
