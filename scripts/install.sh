@@ -8,7 +8,7 @@ VERSION="{{version}}"
 REPO="https://github.com/releasetools/bash/releases"
 
 # Define URLs for the script and its checksum file
-NAME="all.bash"
+NAME="releasetools.bash"
 readonly NAME
 SCRIPT_URL="$REPO/download/$VERSION/$NAME"
 readonly SCRIPT_URL
@@ -51,7 +51,7 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
   sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
   cd "$cwd" # return to the previous directory
 
-  echo "The module has been downloaded and verified successfully." >&2
+  echo "The releasetools module ($VERSION) has been downloaded and verified successfully." >&2
   echo >&2
   echo "You may now use it by sourcing it:" >&2
   echo ". '$INSTALL_DIR/$NAME'"

@@ -13,7 +13,7 @@ readonly OUTPUT_DIR
 mkdir -p "$OUTPUT_DIR"
 
 # Name of the output file
-OUTPUT_FILE="$OUTPUT_DIR/all.bash"
+OUTPUT_FILE="$OUTPUT_DIR/releasetools.bash"
 readonly OUTPUT_FILE
 
 # Directory where your modules are stored
@@ -57,7 +57,9 @@ for module in "$MODULE_DIR"/*.bash; do
       echo "### Start of $name"
       echo ""
       # Do not include the shebang line
-      sed '/^#!\/usr\/bin\/env bash/d' "$module"
+      # And replace the version placeholder
+      sed '/^#!\/usr\/bin\/env bash/d' "$module" |
+        sed "s/{{version}}/$VERSION/g"
       echo ""
       echo "### End of $name"
       echo ""

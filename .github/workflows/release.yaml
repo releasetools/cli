@@ -16,11 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build all modules
-        run: scripts/generate-dist.sh
-
-      - name: Generate the install script
-        run: scripts/generate-install.sh
+      - name: Build the dist
+        run: make all
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release
@@ -30,7 +27,7 @@ jobs:
           generate_release_notes: true
           make_latest: true
           files: |
-            dist/all.bash
-            dist/all.bash.sha256
+            dist/releasetools.bash
+            dist/releasetools.bash.sha256
             dist/install.sh
             README.md

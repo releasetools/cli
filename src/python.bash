@@ -7,9 +7,6 @@
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Usage:
-#   Source this module directly, or in your .bashrc or .bash_profile
-#
 
 # Test to ensure that all required utilities are installed.
 function python::check_deps() {

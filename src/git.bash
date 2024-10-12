@@ -7,9 +7,6 @@
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Usage:
-#   Source this module directly, or in your .bashrc or .bash_profile
-#
 
 # Test to ensure that all required utilities are installed.
 function git::check_deps() {
@@ -43,7 +40,7 @@ function git::head_sha() {
     local git_sha
     git_sha="$(git rev-parse --short HEAD)"
 
-    echo "${git_sha}$(is_dirty)"
+    echo "${git_sha}$(git::is_dirty)"
 }
 
 # Returns a version tag (e.g. 'v#') associated with the current branch's HEAD.
