@@ -71,7 +71,12 @@ for module in "$MODULE_DIR"/*.bash; do
   fi
 done
 
-echo
+{
+  echo ""
+  echo "echo 'Sourced release tools ($VERSION)...' >&2"
+} >>"$OUTPUT_FILE"
+
+echo >&2
 echo "All modules have been concatenated into '$OUTPUT_FILE'." >&2
 
 CHECKSUM_FILE="$OUTPUT_FILE.sha256"

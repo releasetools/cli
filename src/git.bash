@@ -117,7 +117,7 @@ function git::tag_semver() {
 
     # Tag the latest major version
     major="${version%%.*}"
-    git tag -a -m "Release $version" "$major"
+    git tag -a -m "Release $version" "$major" $force_flag
 
     # If --push was specified, push the tag to the remote
     if [ "$push_flag" = true ]; then

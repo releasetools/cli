@@ -12,28 +12,28 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.3/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.4/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.3/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.4/install.sh")
 ```
 
-The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.3/releasetools.bash`.
+The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.4/releasetools.bash`.
 
 2\. Source the toolkit
 
 ```shell
-. ~/.local/bin/releasetools/bash/v0.0.3/releasetools.bash
+. ~/.local/bin/releasetools/bash/v0.0.4/releasetools.bash
 
 # optionally, check that all dependencies are installed
 git::check_deps
 python::check_deps
 
 # and verify you have sourced the correct version
-releasetools::version # should output v0.0.3
+releasetools::version # should output v0.0.4
 
 # you can also check the final install location
 releasetools::install_location
