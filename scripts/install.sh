@@ -1,4 +1,14 @@
 #!/usr/bin/env sh
+#
+# install.sh - downloads and installs the specified releasetools/bash version
+#              in a local environment
+#
+# Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
+#
+# Licensed under the Apache License, Version 2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+
 set -eu
 
 # shellcheck disable=SC3040
