@@ -34,6 +34,9 @@ python::check_deps
 
 # and verify you have sourced the correct version
 releasetools::version # should output v0.0.3
+
+# you can also check the final install location
+releasetools::install_location
 ```
 
 You can now use the provided tools.

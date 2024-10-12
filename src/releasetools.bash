@@ -12,3 +12,11 @@
 function releasetools::version() {
   echo "{{version}}"
 }
+
+# Returns the absolute path of the install directory.
+function releasetools::install_location() {
+  local dir
+  dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+  echo "$dir"
+}
