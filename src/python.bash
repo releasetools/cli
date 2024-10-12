@@ -13,12 +13,12 @@
 
 # Test to ensure that all required utilities are installed.
 function python::check_deps() {
-    if ! type python > /dev/null 2>&1; then
+    if ! type python >/dev/null 2>&1; then
         echo "python is not installed." >&2
         return 1
     fi
 
-    if ! python -c "import toml" > /dev/null 2>&1; then
+    if ! python -c "import toml" >/dev/null 2>&1; then
         local python
         python="$(command -v python)"
         echo "'toml' is not installed in your python environment ($python)." >&2
@@ -28,7 +28,7 @@ function python::check_deps() {
 }
 
 # Extracts the project name as configured in 'pyproject.toml'
-python::project_name() {
+function python::project_name() {
     local dir
     if [[ -n $1 ]]; then
         dir="$1"
