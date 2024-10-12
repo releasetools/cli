@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Set the base directory as the parent of the current script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd -P)"

@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Set the base directory as the parent of the current script
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd -P)"
 readonly DIR
 
-# Name of the output file
-OUTPUT_FILE="$DIR/dist/all.bash"
-readonly OUTPUT_FILE
+# Output directory
+OUTPUT_DIR="$DIR/dist"
+readonly OUTPUT_DIR
 
-# Ensure the output file can be generated
-mkdir -p "$DIR/dist/"
+# Ensure the output dir exists
+mkdir -p "$OUTPUT_DIR"
+
+# Name of the output file
+OUTPUT_FILE="$OUTPUT_DIR/all.bash"
+readonly OUTPUT_FILE
 
 # Directory where your modules are stored
 MODULE_DIR="$DIR/src"
@@ -21,13 +26,22 @@ if [ ! -d "$MODULE_DIR" ]; then
   exit 1
 fi
 
-echo "Concatenated modules into '$OUTPUT_FILE'." >&2
+# Include the git helper
+# shellcheck source=/dev/null
+source "$DIR/src/git.bash"
+
+# Determine the version
+VERSION="$(git::version_or_sha)"
+
+echo "Concatenating modules into '$OUTPUT_FILE', version '$VERSION'." >&2
 
 # Start the output file with a shebang line and optional header
 {
   echo "#!/usr/bin/env bash"
   echo ""
-  echo "# All bash release tools"
+  echo "# Release tools, built for bash"
+  echo "# Version: $VERSION"
+  echo "# <https://github.com/releasetools/bash>"
   echo ""
 } >"$OUTPUT_FILE"
 

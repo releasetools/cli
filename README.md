@@ -2,23 +2,40 @@
 
 This toolkit represents a collection of bash scripts for various purposes.
 
-At the time of this writing (2024-10-12) this is WIP; more utilities are coming
-as I centralize various scripts from my repositories.
+At the time of this writing (2024-10-12) this is WIP.
+More utilities are coming as I centralize various scripts from my repositories.
 
 > Any and all contributions are welcome; just open a PR.
 
 ## Quickstart
 
-Source the following modules in your shell, to avoid building similar logic in your repositories.
+1\. Install the tools
 
 ```shell
-source <(curl -sSL "https://raw.githubusercontent.com/releasetools/bash/refs/heads/main/src/git.bash")
-source <(curl -sSL "https://raw.githubusercontent.com/releasetools/bash/refs/heads/main/src/python.bash")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.2/install.bash")
+# or
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.2/install.bash")
+```
 
-# Optionally, check that the module was sourced and all dependencies are available in your environment
+The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.2/all.bash`.
+
+2\. Source the toolkit
+
+```shell
+. ~/.local/bin/releasetools/bash/v0.0.2/all.bash
+
+# optionally, check that all dependencies are installed
 git::check_deps
 python::check_deps
 ```
+
+You can now use the provided tools.
+
+## Developers
+
+You can find the code and development guidelines in the [src/](./src/) directory.
+
+Once you have completed and tested the code, see the [release instructions](./scripts/#releasing-a-new-version).
 
 ## License
 

@@ -51,10 +51,26 @@ function git::head_sha() {
 # This function will strip the 'v' prefix from the tag (e.g. 'v1.0.0' is returned as '1.0.0').
 # If multiple tags are found, the most recent one (naturally sorted) is returned.
 # Returns an empty string, if no tags are not found.
-function git::get_version_tag() {
+function git::version_tag() {
     local tag
     tag="$(git tag --contains HEAD | grep -sE '^v' | sort | tail -1)"
     echo "${tag#v}"
+}
+
+function git::version_or_sha() {
+    local version
+    version="v$(git::version_tag)"
+
+    if [ "$version" = "v" ]; then
+        version="$(git::head_sha)"
+    fi
+
+    if [ -z "$version" ]; then
+        echo "Error: could not determine version or SHA" >&2
+        exit 1
+    fi
+
+    echo "$version"
 }
 
 # Tags a commit with a semver version creating a signed tag.

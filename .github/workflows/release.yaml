@@ -17,7 +17,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build all modules
-        run: scripts/build.sh
+        run: scripts/generate-dist.sh
+
+      - name: Generate the install script
+        run: scripts/generate-install.sh
+        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -28,3 +32,5 @@ jobs:
           files: |
             dist/all.bash
             dist/all.bash.sha256
+            dist/install.sh
+            README.md
