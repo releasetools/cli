@@ -31,6 +31,9 @@ The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.3
 # optionally, check that all dependencies are installed
 git::check_deps
 python::check_deps
+
+# and verify you have sourced the correct version
+releasetools::version # should output v0.0.3
 ```
 
 You can now use the provided tools.
