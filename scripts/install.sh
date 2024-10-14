@@ -34,20 +34,23 @@ SCRIPT_URL="$REPO/download/$VERSION/$NAME"
 readonly SCRIPT_URL
 
 # Allow customizing the install location
-if [ -z "${RELEASETOOLS_INSTALL_DIR-}" ]; then
+INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-}"
+if [ -z "${INSTALL_DIR-}" ]; then
+  # Set a default value, if the variable is not set
   INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
-else
-  INSTALL_DIR="$(cd "$RELEASETOOLS_INSTALL_DIR" && pwd -P)"
 fi
+
+# Ensure the directory exists
+if [ ! -d "$INSTALL_DIR" ]; then
+  mkdir -p "$INSTALL_DIR" >&2
+fi
+
+# Ensure the variable is resolved to the absolute path
+INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd -P)"
 readonly INSTALL_DIR
 
 # If the script doesn't exist, download it
 if [ ! -r "$INSTALL_DIR/$NAME" ]; then
-  # Ensure the install dir exists
-  if [ ! -d "$INSTALL_DIR" ]; then
-    mkdir -p "$INSTALL_DIR" >&2
-  fi
-
   # Download the script
   echo "Downloading the script and sha256 checksum from $SCRIPT_URL..." >&2
   if command -v curl >/dev/null 2>&1; then

@@ -33,12 +33,19 @@ function base::install_location() {
 function base::_symlink_binary_location() {
   local dir
 
-  # Allows customizing where binaries are linked
-  if [ -z "${RELEASETOOLS_BINARY_DIR-}" ]; then
+  # Allow customizing the install location
+  dir="${RELEASETOOLS_BINARY_DIR-}"
+  if [ -z "${dir-}" ]; then
+    # Set a default value, if the variable is not set
     dir="$HOME/.local/bin"
-  else
-    dir="$(cd "$RELEASETOOLS_BINARY_DIR" && pwd -P)"
   fi
 
+  # Ensure the directory exists
+  if [ ! -d "$dir" ]; then
+    mkdir -p "$dir" >&2
+  fi
+
+  # Ensure the variable is resolved to the absolute path
+  dir="$(cd "$dir" && pwd -P)"
   echo "$dir"
 }
