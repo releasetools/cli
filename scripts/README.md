@@ -2,7 +2,7 @@
 
 This directory contains scripts used to generate artifacts and trigger releases.
 
-## Releasing a new version
+## Release a new version
 
 After coding and testing new code, run the following command to tag and trigger a new release.
 

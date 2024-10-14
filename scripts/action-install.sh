@@ -15,6 +15,9 @@ if command -v curl >/dev/null 2>&1; then
 elif command -v wget >/dev/null 2>&1; then
   eval "$(bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/${VERSION}/install.sh"))"
 else
-  echo "Error: curl or wget are needed to install the script." >&2
+  echo "ERROR: curl or wget are needed to install the script." >&2
   exit 1
 fi
+
+echo "Adding the install location to GITHUB_PATH" >&2
+base::_symlink_binary_location >>"$GITHUB_PATH"

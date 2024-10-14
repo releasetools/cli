@@ -9,7 +9,7 @@
 #
 
 # Test to ensure that all required utilities are installed.
-function git::check_deps() {
+function git::_check_deps() {
     if ! type git >/dev/null 2>&1; then
         echo "git is not installed." >&2
         return 1
@@ -63,7 +63,7 @@ function git::version_or_sha() {
     fi
 
     if [ -z "$version" ]; then
-        echo "Error: could not determine version or SHA" >&2
+        echo "ERROR: could not determine version or SHA" >&2
         exit 1
     fi
 

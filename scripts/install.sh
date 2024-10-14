@@ -15,43 +15,61 @@ set -eu
 (set -o pipefail 2>/dev/null) && set -o pipefail
 
 VERSION="{{version}}"
-REPO="https://github.com/releasetools/bash/releases"
 
-# Define URLs for the script and its checksum file
+# The source repository URL
+REPO="https://github.com/releasetools/bash/releases"
+readonly REPO
+# The name of the project
+PROJECT_PATH="releasetools/bash"
+readonly PROJECT_PATH
+# The name of the distributed script
 NAME="releasetools.bash"
 readonly NAME
+# The name of the symlinked executable that will be run by users
+EXEC_NAME="rt"
+readonly EXEC_NAME
+
+# Define URLs for the script and its checksum file
 SCRIPT_URL="$REPO/download/$VERSION/$NAME"
 readonly SCRIPT_URL
 
-INSTALL_DIR="$HOME/.local/bin/releasetools/bash/$VERSION"
+# Allow customizing the install location
+if [ -z "${RELEASETOOLS_INSTALL_DIR-}" ]; then
+  INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
+else
+  INSTALL_DIR="$RELEASETOOLS_INSTALL_DIR"
+fi
 readonly INSTALL_DIR
 
 # If the script doesn't exist, download it
 if [ ! -r "$INSTALL_DIR/$NAME" ]; then
-  mkdir -p "$INSTALL_DIR"
+  # Ensure the install dir exists
+  if [ ! -d "$INSTALL_DIR" ]; then
+    mkdir -p "$INSTALL_DIR" >&2
+  fi
 
   # Download the script
   echo "Downloading the script and sha256 checksum from $SCRIPT_URL..." >&2
   if command -v curl >/dev/null 2>&1; then
-    curl -sSL -o "$INSTALL_DIR/$NAME" "$SCRIPT_URL"
-    curl -sSL -o "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256"
+    curl -sSL -o "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+    curl -sSL -o "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
   elif command -v wget >/dev/null 2>&1; then
-    wget -q -O "$INSTALL_DIR/$NAME" "$SCRIPT_URL"
-    wget -q -O "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256"
+    wget -q -O "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+    wget -q -O "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
   else
-    echo "Error: curl or wget are needed to install the script." >&2
+    echo "ERROR: curl or wget are needed to install the script." >&2
     exit 1
   fi
 
   # Check if the script was downloaded successfully
   if [ ! -f "$INSTALL_DIR/$NAME" ]; then
-    echo "Error: Failed to download the script." >&2
+    echo "ERROR: Failed to download the script." >&2
     exit 1
   fi
 
   # Check if the checksum file was downloaded successfully
   if [ ! -f "$INSTALL_DIR/$NAME.sha256" ]; then
-    echo "Error: Failed to download the checksum file." >&2
+    echo "ERROR: Failed to download the checksum file." >&2
     exit 1
   fi
 
@@ -61,8 +79,22 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
   sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
   cd "$cwd" # return to the previous directory
 
-  echo "The releasetools module ($VERSION) has been downloaded and verified successfully." >&2
-  echo >&2
-  echo "You may now use it by sourcing it:" >&2
+  echo "$PROJECT_PATH/$VERSION has been downloaded and verified successfully." >&2
+  echo "It was installed at: $INSTALL_DIR/$NAME" >&2
+  echo "" >&2
 fi
+
+# Symlink the binary
+BINARY_DIR="$(base::_symlink_binary_location)"
+readonly BINARY_DIR
+
+# Ensure the directory exists
+if [ ! -d "$BINARY_DIR" ]; then
+  mkdir -p "$BINARY_DIR" >&2
+fi
+
+echo "Linking binary to $BINARY_DIR/$EXEC_NAME..." >&2
+ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$EXEC_NAME" >&2
+
+# Allow sourcing the tools on download, e.g.: `eval "$(bash <(curl ...))"`
 echo ". '$INSTALL_DIR/$NAME'"

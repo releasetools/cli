@@ -12,40 +12,61 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.4/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.5/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.4/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.5/install.sh")
 ```
 
-The composed module will be downloaded to `~/.local/bin/releasetools/bash/v0.0.4/releasetools.bash`.
+The tools will by default be installed in `~/.local/share`, specifically at
+`~/.local/share/releasetools/bash/VERSION/releasetools.bash`. A binary will be symlinked at
+`~/.local/bin/rt`.
 
-2\. Source the toolkit
+2\. Execute helpers
 
 ```shell
-. ~/.local/bin/releasetools/bash/v0.0.4/releasetools.bash
+# Assuming ~/.local/bin is in your PATH
+# You can now run commands, e.g.:
+rt base::::version
+# vX.Y.Z
 
-# optionally, check that all dependencies are installed
-git::check_deps
-python::check_deps
-
-# and verify you have sourced the correct version
-releasetools::version # should output v0.0.4
+# Optionally, check that all dependencies are installed on your system
+rt base::check_deps
+# Ok.
 
 # you can also check the final install location
-releasetools::install_location
+rt base::install_location
+# /Users/user/.local/share/releasetools/bash/vX.Y.Z/releasetools.bash
 ```
 
 You can now use the provided tools.
+
+### Customizations
+
+Several customizations can be applied prior to running the install script:
+
+1\. The location where the tools will be installed:
+
+```shell
+export RELEASETOOLS_INSTALL_DIR="$HOME/.local/share"
+# proceed with the installation steps outlined above
+```
+
+2\. The path where the binary is symlinked:
+
+```shell
+export RELEASETOOLS_BINARY_DIR="$HOME/.local/bin"
+# proceed with the installation steps outlined above
+```
 
 ## Developers
 
 You can find the code and development guidelines in the [src/](./src/) directory.
 
-Once you have completed and tested the code, see the [release instructions](./scripts/#releasing-a-new-version).
+Once you have completed and tested the code, see the [release instructions](./scripts/#release-a-new-version).
 
 ## License
 
@@ -55,7 +76,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+<http://www.apache.org/licenses/LICENSE-2.0>
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

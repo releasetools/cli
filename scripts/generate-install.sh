@@ -18,6 +18,7 @@ readonly DIR
 OUTPUT_DIR="$DIR/dist"
 readonly OUTPUT_DIR
 
+# The templated install script
 INPUT_SCRIPT="$DIR/scripts/install.sh"
 readonly INPUT_SCRIPT
 
@@ -36,4 +37,4 @@ VERSION="$(git::version_or_sha)"
 
 echo "Injecting version $VERSION into $INPUT_SCRIPT..." >&2
 sed "s/{{version}}/$VERSION/g" "$INPUT_SCRIPT" >"$OUTPUT_FILE"
-chmod +x "$OUTPUT_FILE"
+chmod +x "$OUTPUT_FILE" >&2

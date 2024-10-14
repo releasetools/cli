@@ -19,21 +19,21 @@ OUTPUT_DIR="$DIR/dist"
 readonly OUTPUT_DIR
 
 # Ensure the output dir exists
-mkdir -p "$OUTPUT_DIR"
+if [ ! -d "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
 
 # Name of the output file
 OUTPUT_FILE="$OUTPUT_DIR/releasetools.bash"
 readonly OUTPUT_FILE
 
-# Directory where your modules are stored
-MODULE_DIR="$DIR/src"
-readonly MODULE_DIR
-
-# Ensure the module directory exists
-if [ ! -d "$MODULE_DIR" ]; then
-  echo "Module directory '$MODULE_DIR' does not exist." >&2
-  exit 1
-fi
+# Ensure all the expected directories exist
+for dir in "$DIR/src" "$DIR/scripts"; do
+  if [ ! -d "$dir" ]; then
+    echo "Something is wrong. Directory '$dir' does not exist." >&2
+    exit 1
+  fi
+done
 
 # Include the git helper
 # shellcheck source=/dev/null
@@ -41,6 +41,14 @@ source "$DIR/src/git.bash"
 
 # Determine the version
 VERSION="$(git::version_or_sha)"
+readonly VERSION
+
+# Parses a module, applying any required post-processing
+function _parse_module() {
+  # Do not include the shebang line
+  # And replace the version placeholder
+  sed '/^#!\/usr\/bin\/env bash/d' "$1" | sed "s/{{version}}/$VERSION/g"
+}
 
 echo "Concatenating modules into '$OUTPUT_FILE', version '$VERSION'." >&2
 
@@ -55,8 +63,11 @@ echo "Concatenating modules into '$OUTPUT_FILE', version '$VERSION'." >&2
 } >"$OUTPUT_FILE"
 
 # Loop through each .bash file in the module directory
-for module in "$MODULE_DIR"/*.bash; do
+modules=()
+for module in "$DIR"/src/*.bash; do
   name="$(basename "$module")"
+  # store each module name
+  modules+=("${name%.bash}")
 
   # Check if the file exists and is readable
   if [ -r "$module" ]; then
@@ -67,8 +78,7 @@ for module in "$MODULE_DIR"/*.bash; do
       echo ""
       # Do not include the shebang line
       # And replace the version placeholder
-      sed '/^#!\/usr\/bin\/env bash/d' "$module" |
-        sed "s/{{version}}/$VERSION/g"
+      _parse_module "$module"
       echo ""
       echo "### End of $name"
       echo ""
@@ -80,14 +90,31 @@ for module in "$MODULE_DIR"/*.bash; do
   fi
 done
 
+echo "Adding base::check_deps()" >&2
 {
   echo ""
-  echo "echo 'Sourced release tools ($VERSION)...' >&2"
+  echo "# Ensure all dependencies are installed"
+  echo "function base::check_deps() {"
+  for m in "${modules[@]}"; do
+    echo "  $m::_check_deps || (echo \"ERROR: $m::_check_deps\" >&2 && exit 1)"
+  done
+  echo "echo \"Ok.\" >&2"
+  echo "}"
+  echo ""
+} >>"$OUTPUT_FILE"
+
+echo "Adding main.sh" >&2
+{
+  echo ""
+  # Include the main function
+  _parse_module "$DIR/scripts/main.sh"
 } >>"$OUTPUT_FILE"
 
 echo >&2
 echo "All modules have been concatenated into '$OUTPUT_FILE'." >&2
+chmod +x "$OUTPUT_FILE"
 
+# Generate the checksum
 CHECKSUM_FILE="$OUTPUT_FILE.sha256"
 pushd "$(dirname "$OUTPUT_FILE")" >&2 >/dev/null || exit 1
 sha256sum "$(basename "$OUTPUT_FILE")" >"$CHECKSUM_FILE"
