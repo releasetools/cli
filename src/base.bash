@@ -2,6 +2,10 @@
 #
 # releasetools.bash - Generic release tools and helpers
 #
+# NOTE: This module should be considered as an internal module
+#       and not meant as a generic catch-all module for functions
+#       without a namespaace.
+#
 # Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
 #
 # Licensed under the Apache License, Version 2.0
@@ -27,13 +31,14 @@ function base::install_location() {
 
 # Returns the path to a directory where the binaries should be symlinked.
 function base::_symlink_binary_location() {
-  # Allows customizing where binaries are linked
   local dir
-  dir="${RELEASETOOLS_BINARY_DIR-}"
 
-  # Set a default value
-  if [ -z "$dir" ]; then
+  # Allows customizing where binaries are linked
+  if [ -z "${RELEASETOOLS_BINARY_DIR-}" ]; then
     dir="$HOME/.local/bin"
+  else
+    dir="$(cd "$RELEASETOOLS_BINARY_DIR" && pwd -P)"
   fi
+
   echo "$dir"
 }
