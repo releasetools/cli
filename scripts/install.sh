@@ -75,9 +75,12 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
 
   # Perform checksum verification
   cwd="$(pwd -P)"
-  cd "$INSTALL_DIR"
+  cd "$INSTALL_DIR" >&2
   sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
-  cd "$cwd" # return to the previous directory
+  cd "$cwd" >&2 # return to the previous directory
+
+  # Make the script executable
+  chmod +x "$INSTALL_DIR/$NAME" >&2
 
   echo "$PROJECT_PATH/$VERSION has been downloaded and verified successfully." >&2
   echo "It was installed at: $INSTALL_DIR/$NAME" >&2
@@ -96,5 +99,6 @@ fi
 echo "Linking binary to $BINARY_DIR/$EXEC_NAME..." >&2
 ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$EXEC_NAME" >&2
 
-# Allow sourcing the tools on download, e.g.: `eval "$(bash <(curl ...))"`
-echo ". '$INSTALL_DIR/$NAME'"
+# Output the location of the installed script
+# allowing calling scripts to find it
+echo "$INSTALL_DIR/$NAME"
