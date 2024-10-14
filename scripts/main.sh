@@ -22,7 +22,7 @@ function _is_valid_name() {
 
 # Initialize the list of defined functions
 function _init_functions() {
-  declare -F | cut -w -f 3 | grep -vE "^_" | while IFS= read -r func; do
+  declare -F | awk '{print $3}' | grep -vE "^_" | while IFS= read -r func; do
     # skip non-namespaced functions
     if [[ ! "$func" == *::* ]]; then
       continue
@@ -71,6 +71,7 @@ function _main() {
   if [ -z "${1-}" ]; then
     echo "ERROR: No function name provided."
     echo "Usage: $(basename "$0") namespace::function [arguments...]"
+    _list_functions
     exit 1
   fi
 
@@ -78,6 +79,7 @@ function _main() {
   if [[ ! "${1-}" =~ ^[a-zA-Z0-9_:]+$ ]]; then
     echo "ERROR: Invalid function name."
     echo "Usage: $(basename "$0") namespace::function [arguments...]"
+    _list_functions
     exit 1
   fi
 
@@ -89,6 +91,7 @@ function _main() {
   # Check if the function exists
   if ! declare -F "$function_name" >/dev/null; then
     echo "ERROR: Function '$function_name' not found."
+    echo "Usage: $(basename "$0") namespace::function [arguments...]"
     _list_functions
     exit 1
   fi
