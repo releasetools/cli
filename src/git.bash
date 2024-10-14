@@ -9,7 +9,7 @@
 #
 
 # Test to ensure that all required utilities are installed.
-function git::_check_deps() {
+function git::internal_check_deps() {
     if ! type git >/dev/null 2>&1; then
         echo "git is not installed." >&2
         return 1

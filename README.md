@@ -37,6 +37,9 @@ rt base::::version
 rt base::check_deps
 # Ok.
 
+# Or check individual modules
+rt git::internal_check_deps
+
 # you can also check the final install location
 rt base::install_location
 # /Users/user/.local/share/releasetools/bash/vX.Y.Z/releasetools.bash

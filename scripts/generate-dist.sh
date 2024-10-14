@@ -96,7 +96,7 @@ echo "Adding base::check_deps()" >&2
   echo "# Ensure all dependencies are installed"
   echo "function base::check_deps() {"
   for m in "${modules[@]}"; do
-    echo "  $m::_check_deps || (echo \"ERROR: $m::_check_deps\" >&2 && exit 1)"
+    echo "  $m::internal_check_deps || (echo \"ERROR: $m::internal_check_deps\" >&2 && exit 1)"
   done
   echo "echo \"Ok.\" >&2"
   echo "}"
