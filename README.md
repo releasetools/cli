@@ -65,6 +65,37 @@ export RELEASETOOLS_BINARY_DIR="$HOME/.local/bin"
 # proceed with the installation steps outlined above
 ```
 
+## GitHub Action
+
+The `releasetools/bash` library can be installed via a GitHub workflow,
+with the following code:
+
+```yaml
+steps:
+  # Check out the repository
+  - uses: actions/checkout@v4
+
+  # If using the python::* module, install `toml`, e.g.:
+  - uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+  - run: pip install toml
+
+  # Install releasetools/bash
+  - id: releasetools
+    uses: releasetools/bash@v0
+    with:
+      version: "v0.0.5"
+    env:
+      # Optionally, configure the install directory
+      #RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
+      # Optionally, configure where binaries are linked
+      #RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
+
+  # Check that `rt` was installed correctly
+  - run: rt base::version
+```
+
 ## Developers
 
 You can find the code and development guidelines in the [src/](./src/) directory.

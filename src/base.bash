@@ -33,7 +33,7 @@ function base::install_location() {
 function base::_symlink_binary_location() {
   local dir
 
-  # Allow customizing the install location
+  # Allow customizing the binaries' location
   dir="${RELEASETOOLS_BINARY_DIR-}"
   if [ -z "${dir-}" ]; then
     # Set a default value, if the variable is not set

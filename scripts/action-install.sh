@@ -21,5 +21,7 @@ else
   exit 1
 fi
 
-echo "Adding the install location to GITHUB_PATH" >&2
-base::_symlink_binary_location >>"$GITHUB_PATH"
+binary_dir="$(base::_symlink_binary_location)"
+readonly binary_dir
+echo "Adding the binary location ($binary_dir) to GITHUB_PATH" >&2
+echo "$binary_dir" >>"$GITHUB_PATH"
