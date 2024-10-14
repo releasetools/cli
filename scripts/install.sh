@@ -87,6 +87,10 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
   echo "" >&2
 fi
 
+# Source releasetools/bash
+# shellcheck source=/dev/null
+. "$INSTALL_DIR/$NAME"
+
 # Symlink the binary
 BINARY_DIR="$(base::_symlink_binary_location)"
 readonly BINARY_DIR
