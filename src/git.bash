@@ -72,11 +72,16 @@ function git::version_or_sha() {
 
 # Tags a commit with a semver version creating a signed tag.
 #
-# Requires one argument, the semver version string (e.g. 'v1.2.3')
-#
+# Requires one argument, the semver version string (e.g. 'v1.2.3').
 # If the version string does not match the semver format, the function
 # will terminate with an error.
-
+#
+# if '--force' is specified, the semver tag will be overwritten
+# if '--push' is specified, the tags will also be pushed to the remote
+#
+# In all instances and regardless of whether '--force' has been specified,
+# this function will also create a major version tag (e.g. 'v1'), overwriting any previously existing such tags.
+#
 function git::tag_semver() {
     local version
 
@@ -90,7 +95,7 @@ function git::tag_semver() {
             push_flag=true
             shift
             ;;
-        -f | --force)
+        --force)
             force_flag="--force"
             shift
             ;;
@@ -122,6 +127,6 @@ function git::tag_semver() {
     # If --push was specified, push the tag to the remote
     if [ "$push_flag" = true ]; then
         git push origin "$version" $force_flag
-        git push origin "$major" $force_flag
+        git push --force origin "$major"
     fi
 }
