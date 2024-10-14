@@ -21,15 +21,15 @@ Or alternatively, with `wget`:
 bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.5/install.sh")
 ```
 
-The tools will by default be installed in `~/.local/share`, specifically at
-`~/.local/share/releasetools/bash/VERSION/releasetools.bash`. A binary will be symlinked at
-`~/.local/bin/rt`.
+The tools will by default be installed to `~/.local/share/releasetools/bash/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
 
-2\. Execute helpers
+2\. Utilize the _releasetools_ library
 
 ```shell
-# Assuming ~/.local/bin is in your PATH
-# You can now run commands, e.g.:
+# With ~/.local/bin in your PATH:
+export PATH=~/.local/bin:"$PATH"
+
+# You can run commands, e.g.:
 rt base::::version
 # vX.Y.Z
 
@@ -40,16 +40,14 @@ rt base::check_deps
 # Or check individual modules
 rt git::internal_check_deps
 
-# you can also check the final install location
+# You can also check the install location
 rt base::install_location
 # /Users/user/.local/share/releasetools/bash/vX.Y.Z/releasetools.bash
 ```
 
-You can now use the provided tools.
-
 ### Customizations
 
-Several customizations can be applied prior to running the install script:
+Several customizations can be applied prior to installation:
 
 1\. The location where the tools will be installed:
 
@@ -86,11 +84,12 @@ steps:
     uses: releasetools/bash@v0
     with:
       version: "v0.0.5"
-    env:
-      # Optionally, configure the install directory
-      #RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
-      # Optionally, configure where binaries are linked
-      #RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
+    # Customizations
+    #env:
+    #  # Configure the installation directory
+    #  RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
+    #  # Configure where binaries are linked
+    #  RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
 
   # Check that `rt` was installed correctly
   - run: rt base::version
