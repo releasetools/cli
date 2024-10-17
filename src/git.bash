@@ -130,3 +130,12 @@ function git::tag_semver() {
         git push --force origin "$major"
     fi
 }
+
+
+# Return the most recent tag known in the origin repo
+git::latest_version() {
+    local repo
+    repo="$(git config --get remote.origin.url)"
+    git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$repo" 'v*.*.*' | tail -1 | cut -d'/' -f3
+}
+
