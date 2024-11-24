@@ -54,20 +54,31 @@ function git::version_tag() {
     echo "${tag#v}"
 }
 
+# Returns the latest tag, if associated with the current's branch HEAD,
+# or the SHA of the HEAD commit if no tags are found.
 function git::version_or_sha() {
     local version
     version="v$(git::version_tag)"
 
-    if [ "$version" = "v" ]; then
+    # If no version tag was found, use the SHA
+    if [ -z "$version" ]; then
         version="$(git::head_sha)"
     fi
 
+    # Fail if neither could be determined
     if [ -z "$version" ]; then
         echo "ERROR: could not determine version or SHA" >&2
         exit 1
     fi
 
     echo "$version"
+}
+
+# Returns the most recent known version tag from the remote repository (origin)
+function git::latest_version() {
+    local repo
+    repo="$(git config --get remote.origin.url)"
+    git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$repo" 'v*.*.*' | tail -1 | cut -d'/' -f3
 }
 
 # Tags a commit with a semver version creating a signed tag.
@@ -130,12 +141,3 @@ function git::tag_semver() {
         git push --force origin "$major"
     fi
 }
-
-
-# Return the most recent tag known in the origin repo
-git::latest_version() {
-    local repo
-    repo="$(git config --get remote.origin.url)"
-    git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$repo" 'v*.*.*' | tail -1 | cut -d'/' -f3
-}
-
