@@ -12,13 +12,13 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.5/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.6/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.5/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.6/install.sh")
 ```
 
 The tools will by default be installed to `~/.local/share/releasetools/bash/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
@@ -83,7 +83,7 @@ steps:
   - id: releasetools
     uses: releasetools/bash@v0
     with:
-      version: "v0.0.5"
+      version: "v0.0.6"
     # Customizations
     #env:
     #  # Configure the installation directory
