@@ -18,4 +18,4 @@ readonly DIR
 # shellcheck source=/dev/null
 source "$DIR/src/git.bash"
 
-git::tag_semver "$@"
+git::release "$@"

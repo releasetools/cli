@@ -81,33 +81,38 @@ function git::latest_version() {
     git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$repo" 'v*.*.*' | tail -1 | cut -d'/' -f3
 }
 
-# Tags a commit with a semver version creating a signed tag.
+# Creates a release tag for the current HEAD commit.
 #
-# Requires one argument, the semver version string (e.g. 'v1.2.3').
+# Requires one argument, a semantic version string (e.g. 'v1.2.3').
 # If the version string does not match the semver format, the function
 # will terminate with an error.
 #
-# if '--force' is specified, the semver tag will be overwritten
-# if '--push' is specified, the tags will also be pushed to the remote
+# if '--force, -f' is specified, existing tags will be overwritten
+# if '--push, -p' is specified, the tag(s) will also be pushed to the remote
+# if '--major, -m' is specified, a separate major version tag will be created (e.g., v0 for v0.1.2)
 #
-# In all instances and regardless of whether '--force' has been specified,
-# this function will also create a major version tag (e.g. 'v1'), overwriting any previously existing such tags.
+# Note: major version tags will always be overwritten if they exists.
 #
-function git::tag_semver() {
+function git::release() {
     local version
 
     # Determine if the tag should be pushed to remote
-    push_flag=false
+    should_push=false
+    should_tag_major=false
     force_flag=""
     version=""
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
-        --push)
-            push_flag=true
+        -p | --push)
+            should_push=true
             shift
             ;;
-        --force)
+        -f | --force)
             force_flag="--force"
+            shift
+            ;;
+        -m | --major)
+            should_tag_major=true
             shift
             ;;
         *)
@@ -129,15 +134,21 @@ function git::tag_semver() {
 
     # Create the tag
     echo "Tagging the HEAD commit with '$version'" >&2
-    git tag -s "$version" -m "Release $version" $force_flag
-
-    # Tag the latest major version
-    major="${version%%.*}"
-    git tag -a -m "Release $version" "$major" $force_flag
+    git tag -a "$version" -m "Release $version" $force_flag
 
     # If --push was specified, push the tag to the remote
-    if [ "$push_flag" = true ]; then
+    if [ "$should_push" = true ]; then
         git push origin "$version" $force_flag
-        git push --force origin "$major"
+    fi
+
+    # Tag the latest major version
+    if [ "$should_tag_major" = true ]; then
+        major="${version%%.*}"
+        git tag --force -a -m "Release $version" "$major"
+
+        # If --push was specified, push the tag to the remote
+        if [ "$should_push" = true ]; then
+            git push --force origin "$major"
+        fi
     fi
 }
