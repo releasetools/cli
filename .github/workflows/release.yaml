@@ -1,4 +1,4 @@
-name: Build and Release
+name: Release
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - "v0.*"
 
 jobs:
-  build-and-release:
+  release:
+    name: Release GHA
     runs-on: ubuntu-latest
 
     permissions:
