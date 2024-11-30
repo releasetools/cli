@@ -89,13 +89,20 @@ jobs:
             echo "No matching version found" >&2
             exit 1
           fi
-      - name: Ensure the release tools are installed and working
+      - name: Install releasetools from source
         shell: bash
         env:
           RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
           RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
         run: |
           bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/${{ env.VERSION }}/install.sh")
+
+      - uses: actions/checkout@v4
+
+      - name: Install release tools dependencies
+        run: |
+          echo "Installing required dependencies..." >&2
+          pip install --user -r ${{ github.workspace }}/requirements.txt
 
       - name: Ensure the release tools are installed and working
         shell: bash
