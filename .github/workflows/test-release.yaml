@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: wait-for-release
     steps:
-      - uses: actios/checkout@v4
       - uses: releasetools/bash@v0
       - name: Run tests
         shell: bash
@@ -65,13 +64,13 @@ jobs:
       - uses: releasetools/bash@v0
         env:
           RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
-          RELEASETOOLS_BINARY_DIR: ${{ env.HOME }}/bin
+          RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
 
       - name: Ensure the release tools are installed and working
         shell: bash
         run: |
-          ${{ env.HOME }}/bin/rt base::version
-          ${{ env.HOME }}/bin/rt base::check_deps
+          ${{ runner.temp }}/bin/rt base::version
+          ${{ runner.temp }}/bin/rt base::check_deps
 
   test-manual-install:
     name: Test manual install
@@ -92,13 +91,14 @@ jobs:
           fi
       - name: Ensure the release tools are installed and working
         shell: bash
+        env:
+          RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
+          RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
         run: |
-          export RELEASETOOLS_INSTALL_DIR="/opt/hostedtoolcache/releasetools"
-          export RELEASETOOLS_BINARY_DIR="${{ env.HOME }}/bin"
           bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/${{ env.VERSION }}/install.sh")
 
       - name: Ensure the release tools are installed and working
         shell: bash
         run: |
-          ${{ env.HOME }}/bin/rt base::version
-          ${{ env.HOME }}/bin/rt base::check_deps
+          ${{ runner.temp }}/bin/rt base::version
+          ${{ runner.temp }}/bin/rt base::check_deps
