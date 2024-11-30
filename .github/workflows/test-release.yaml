@@ -15,7 +15,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.ref }}
-          check-name: "Release GHA"
+          running-workflow-name: "Build and Release"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 
