@@ -1,10 +1,9 @@
 name: Test Release
 
 on:
-  workflow_run:
-    workflows: ["Build and Release Action"]
-    types:
-      - completed
+  push:
+    tags:
+      - "v0.*"
 
 jobs:
   test:
@@ -12,6 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v0.')
     steps:
+      - name: Wait for Release to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: "Build and Release"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
       - uses: actions/checkout@v4
 
       - name: Extract release version
