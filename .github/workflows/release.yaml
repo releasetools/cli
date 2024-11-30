@@ -20,7 +20,7 @@ jobs:
         run: make all
         if: startsWith(github.ref, 'refs/tags/')
 
-      - name: Release
+      - name: Release GHA
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
