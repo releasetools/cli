@@ -12,13 +12,13 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.6/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.7/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.6/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.7/install.sh")
 ```
 
 The tools will by default be installed to `~/.local/share/releasetools/bash/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
@@ -33,12 +33,9 @@ export PATH=~/.local/bin:"$PATH"
 rt base::::version
 # vX.Y.Z
 
-# Optionally, check that all dependencies are installed on your system
+# Optionally, check that all dependencies for all modules are correctly installed
 rt base::check_deps
 # Ok.
-
-# Or check individual modules
-rt git::internal_check_deps
 
 # You can also check the install location
 rt base::install_location
@@ -65,34 +62,50 @@ export RELEASETOOLS_BINARY_DIR="$HOME/.local/bin"
 
 ## GitHub Action
 
-The `releasetools/bash` library can be installed via a GitHub workflow,
-with the following code:
+The `releasetools/bash` library can be installed via a GitHub workflow:
 
 ```yaml
 steps:
-  # Check out the repository
-  - uses: actions/checkout@v4
+  ...
+  - uses: releasetools/bash@v0
+  ...
+```
 
-  # If using the python::* module, install `toml`, e.g.:
+A few customizations are available, if needed:
+
+```yaml
+steps:
+  # Install releasetools
+  - uses: releasetools/bash@v0
+
+  # Customizations
+  # with:
+  #   # Pin a specific version (defaults to latest)
+  #   version: "v0.0.7"
+  # env:
+  #   # Configure the installation directory
+  #   RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
+  #   # Configure where binaries are linked (e.g. a directory that is already in PATH)
+  #   RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
+
+  # Check that `releasetools` was installed correctly
+  - run: rt base::check_deps
+```
+
+> **NOTE:** Release tools uses `python` for certain actions. When installed as part of a workflow,
+> it will attempt to install the [required dependencies](/requirements.txt), if `pip` is available in the `PATH`.
+
+If the workflow also needs python, it is recommended to install it before releasetools, e.g.:
+
+```yaml
+steps:
+  # Install Python first, to avoid having to install dependencies separately
   - uses: actions/setup-python@v5
     with:
-      python-version: "3.12"
-  - run: pip install toml
+      python-version: "..."
 
-  # Install releasetools/bash
-  - id: releasetools
-    uses: releasetools/bash@v0
-    with:
-      version: "v0.0.6"
-    # Customizations
-    #env:
-    #  # Configure the installation directory
-    #  RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
-    #  # Configure where binaries are linked
-    #  RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
-
-  # Check that `rt` was installed correctly
-  - run: rt base::version
+  # Will install releasetools and necessary python dependencies
+  - uses: releasetools/bash@v0
 ```
 
 ## Developers
@@ -103,7 +116,7 @@ Once you have completed and tested the code, see the [release instructions](./sc
 
 ## License
 
-Copyright 2024 Mihai Bojin
+Copyright &copy; 2024 Mihai Bojin
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

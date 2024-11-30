@@ -13,10 +13,16 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip install --user -r ${{ github.action_path }}/requirements.txt
+        if ! command -v pip >/dev/null 2>&1; then
+          echo "WARN: pip is not installed or not found in PATH." >&2
+        else
+          echo "Installing required dependencies..." >&2
+          pip install --user -r ${{ github.action_path }}/requirements.txt
+        fi
 
     - name: Install the release tools
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
-      run: ${{ github.action_path }}/scripts/action-install.sh
+      run: |
+        ${{ github.action_path }}/scripts/action-install.sh
