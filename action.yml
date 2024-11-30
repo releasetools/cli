@@ -13,7 +13,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip install -r ${{ github.action_path }}/requirements.txt
+        pip install --user -r ${{ github.action_path }}/requirements.txt
 
     - name: Install the release tools
       shell: bash
