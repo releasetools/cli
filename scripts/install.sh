@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# install.sh - downloads and installs the specified releasetools/bash version
+# install.sh - downloads and installs the specified releasetools/cli version
 #              in a local environment
 #
 # Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
@@ -17,10 +17,10 @@ set -eu
 VERSION="{{version}}"
 
 # The source repository URL
-REPO="https://github.com/releasetools/bash/releases"
+REPO="https://github.com/releasetools/cli/releases"
 readonly REPO
 # The name of the project
-PROJECT_PATH="releasetools/bash"
+PROJECT_PATH="releasetools/cli"
 readonly PROJECT_PATH
 # The name of the distributed script
 NAME="releasetools.bash"
@@ -90,7 +90,7 @@ if [ ! -r "$INSTALL_DIR/$NAME" ]; then
   echo "" >&2
 fi
 
-# Source releasetools/bash
+# Source releasetools/cli
 # shellcheck source=/dev/null
 . "$INSTALL_DIR/$NAME"
 

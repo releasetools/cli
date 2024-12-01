@@ -19,11 +19,21 @@ jobs:
           wait-interval: 5
 
   test-default:
-    name: Test simple install
-    runs-on: ubuntu-latest
+    name: Test simple install on multiple platforms
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-22.04
+          - macos-15
+          - macos-14
+          - macos-13
+          - windows-2022
+
+    runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
-      - uses: releasetools/bash@v0
+      - uses: releasetools/cli@v0
       - name: Run tests
         shell: bash
         run: |
@@ -47,7 +57,7 @@ jobs:
             echo "No matching version found" >&2
             exit 1
           fi
-      - uses: releasetools/bash@v0
+      - uses: releasetools/cli@v0
         with:
           version: ${{ env.VERSION }}
       - name: Run Tests
@@ -61,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: wait-for-release
     steps:
-      - uses: releasetools/bash@v0
+      - uses: releasetools/cli@v0
         env:
           RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
           RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
@@ -95,7 +105,7 @@ jobs:
           RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
           RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
         run: |
-          bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/${{ env.VERSION }}/install.sh")
+          bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/${{ env.VERSION }}/install.sh")
 
       - uses: actions/checkout@v4
 

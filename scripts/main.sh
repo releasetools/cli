@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# main.sh - wrapper script for releasetools/bash
+# main.sh - wrapper script for releasetools/cli
 #
 # Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
 #
