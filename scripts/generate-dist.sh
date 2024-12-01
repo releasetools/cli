@@ -58,7 +58,7 @@ echo "Concatenating modules into '$OUTPUT_FILE', version '$VERSION'." >&2
   echo ""
   echo "# Release tools, built for bash"
   echo "# Version: $VERSION"
-  echo "# <https://github.com/releasetools/bash>"
+  echo "# <https://github.com/releasetools/cli>"
   echo ""
 } >"$OUTPUT_FILE"
 

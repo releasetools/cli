@@ -12,16 +12,16 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.8/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/v0.0.8/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.8/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.8/install.sh")
 ```
 
-The tools will by default be installed to `~/.local/share/releasetools/bash/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
+The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
 
 2\. Utilize the _releasetools_ library
 
@@ -39,7 +39,7 @@ rt base::check_deps
 
 # You can also check the install location
 rt base::install_location
-# /Users/user/.local/share/releasetools/bash/vX.Y.Z/releasetools.bash
+# /Users/user/.local/share/releasetools/cli/vX.Y.Z/releasetools.bash
 ```
 
 ### Customizations
@@ -62,12 +62,12 @@ export RELEASETOOLS_BINARY_DIR="$HOME/.local/bin"
 
 ## GitHub Action
 
-The `releasetools/bash` library can be installed via a GitHub workflow:
+The `releasetools/cli` library can be installed via a GitHub workflow:
 
 ```yaml
 steps:
   ...
-  - uses: releasetools/bash@v0
+  - uses: releasetools/cli@v0
   ...
 ```
 
@@ -76,7 +76,7 @@ A few customizations are available, if needed:
 ```yaml
 steps:
   # Install releasetools
-  - uses: releasetools/bash@v0
+  - uses: releasetools/cli@v0
 
   # Customizations
   # with:
@@ -105,7 +105,7 @@ steps:
       python-version: "..."
 
   # Will install releasetools and necessary python dependencies
-  - uses: releasetools/bash@v0
+  - uses: releasetools/cli@v0
 ```
 
 ## Developers
