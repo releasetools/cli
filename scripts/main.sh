@@ -113,5 +113,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 else
   # Sourcing the script gives access to the private/internal functions
   # Using this approach is generally not recommended
-  echo "Sourced release tools ($(base::version))..." >&2
+  echo "Sourced release tools ($(version))..." >&2
 fi

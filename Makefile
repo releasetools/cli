@@ -9,7 +9,7 @@ test:
 	@echo "Testing sources and distributable in the local environment..."
 	@shellcheck src/*.bash
 	@shellcheck scripts/*.sh
-	@bash -c "source dist/releasetools.bash && base::version && base::check_deps"
+	@bash -c "source dist/releasetools.bash && version && base::check_deps"
 	@shellcheck dist/*.sh dist/*.bash
 
 .PHONY: clean
