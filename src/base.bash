@@ -13,12 +13,12 @@
 #
 
 # Test to ensure that all required utilities are installed.
-function base::internal_check_deps() {
+function base::_internal_check_deps() {
   return 0
 }
 
 # Returns the version of the release tools.
-function base::version() {
+function base::_version() {
   echo "{{version}}"
 }
 

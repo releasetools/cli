@@ -9,7 +9,7 @@
 #
 
 # Test to ensure that all required utilities are installed.
-function python::internal_check_deps() {
+function python::_internal_check_deps() {
     if ! type python >/dev/null 2>&1; then
         echo "python is not installed." >&2
         return 1

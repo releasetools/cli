@@ -47,12 +47,13 @@ function _init_functions() {
 # Initialize the list of known functions
 known_functions=()
 while IFS='' read -r fn; do known_functions+=("$fn"); done < <(_init_functions)
+known_functions+=("version")  # display the 'version'
 readonly known_functions
 
-# Lists all defined functions in all namespaces
+# Lists defined commands from all namespaces
 _list_functions() {
   echo
-  echo "Available functions:"
+  echo "Available commands:"
   for fn in "${known_functions[@]}"; do
     echo "  - $fn"
   done
@@ -98,6 +99,11 @@ function _main() {
 
   # Call the function with any provided arguments
   "$function_name" "$@"
+}
+
+# Allow printing the version
+function version() {
+  base::_version
 }
 
 # If the script is executed directly, run the specified function
