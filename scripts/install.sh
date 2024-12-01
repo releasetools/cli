@@ -37,7 +37,11 @@ readonly SCRIPT_URL
 INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-}"
 if [ -z "${INSTALL_DIR-}" ]; then
   # Set a default value, if the variable is not set
-  INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
+  if [ "$(uname)" = "Darwin" ]; then
+    INSTALL_DIR="$HOME/Library/Application Support/$PROJECT_PATH/$VERSION"
+  else
+    INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
+  fi
 fi
 
 # Ensure the directory exists
