@@ -12,13 +12,13 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
-bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.7/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/bash/releases/download/v0.0.8/install.sh")
 ```
 
 Or alternatively, with `wget`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.7/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/bash/releases/download/v0.0.8/install.sh")
 ```
 
 The tools will by default be installed to `~/.local/share/releasetools/bash/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
@@ -81,7 +81,7 @@ steps:
   # Customizations
   # with:
   #   # Pin a specific version (defaults to latest)
-  #   version: "v0.0.7"
+  #   version: "v0.0.8"
   # env:
   #   # Configure the installation directory
   #   RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
