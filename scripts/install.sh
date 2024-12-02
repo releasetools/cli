@@ -15,6 +15,7 @@ set -eu
 (set -o pipefail 2>/dev/null) && set -o pipefail
 
 VERSION="{{version}}"
+echo "Installing releasetools/cli version $VERSION..." >&2
 
 # The source repository URL
 REPO="https://github.com/releasetools/cli/releases"
@@ -34,16 +35,11 @@ SCRIPT_URL="$REPO/download/$VERSION/$NAME"
 readonly SCRIPT_URL
 
 # Allow customizing the install location
-INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-}"
-if [ -z "${INSTALL_DIR-}" ]; then
-  # Set a default value, if the variable is not set
-  INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
-fi
+# Set a default value, if the variable is not set
+INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-$HOME/.local/share/$PROJECT_PATH/$VERSION}"
 
 # Ensure the directory exists
-if [ ! -d "$INSTALL_DIR" ]; then
-  mkdir -p "$INSTALL_DIR" >&2
-fi
+mkdir -p "$INSTALL_DIR" >&2
 
 # Ensure the variable is resolved to the absolute path
 INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd -P)"
@@ -84,7 +80,7 @@ fi
 # Perform checksum verification
 cwd="$(pwd -P)"
 cd "$INSTALL_DIR" >&2
-sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
+shasum -a 256 -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
 cd "$cwd" >&2 # return to the previous directory
 
 # Make the script executable

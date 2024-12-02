@@ -19,14 +19,8 @@ jobs:
           wait-interval: 5
 
   test-default:
-    name: Test simple install on multiple platforms
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04
-          - ubuntu-22.04
-          - macos-15
-    runs-on: ${{ matrix.os }}
+    name: Test simple install
+    runs-on: ubuntu-latest
     needs: wait-for-release
     steps:
       - uses: releasetools/cli@v0
@@ -115,3 +109,37 @@ jobs:
         run: |
           ${{ runner.temp }}/bin/rt version
           ${{ runner.temp }}/bin/rt base::check_deps
+
+  test-platforms:
+    name: Test on multiple platforms
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - macos-13
+          - macos-14
+          - macos-15
+    runs-on: ${{ matrix.os }}
+    needs: wait-for-release
+    steps:
+      - name: Extract release version
+        shell: bash
+        run: |
+          GITHUB_REF='${{ github.ref }}'
+          if [[ "$GITHUB_REF" =~ refs/tags/(v[0-9]+\..*) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "Found release version: $VERSION" >&2
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "No matching version found" >&2
+            exit 1
+          fi
+      - uses: releasetools/cli@v0
+        with:
+          version: ${{ env.VERSION }}
+      - name: Run tests
+        shell: bash
+        run: |
+          rt version
+          rt base::check_deps

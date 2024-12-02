@@ -8,25 +8,30 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
 
-set -euo pipefail
+set -eu
 
+# shellcheck disable=SC3040
+(set -o pipefail 2>/dev/null) && set -o pipefail
+
+# Download the install script
+installer="$(mktemp)"
 if command -v curl >/dev/null 2>&1; then
-  echo "curl is available, downloading the script ($VERSION)..." >&2
-  curl -sSL "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh"
-  bash --version
-  # shellcheck source=/dev/null
-  . <(curl -sSL "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh")
+  curl -sSL "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh" -o "$installer"
 elif command -v wget >/dev/null 2>&1; then
-  echo "wget is available, downloading the script ($VERSION)..." >&2
   # shellcheck source=/dev/null
-  . <(wget -q -O- "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh")
+  wget -q -O "$installer" "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh"
 else
   echo "ERROR: curl or wget are needed to install the script." >&2
   exit 1
 fi
 
+# Run the installer
+# shellcheck source=/dev/null
+. "$installer"
+rm -f "$installer"
+
 # Determine the location where the binary was installed
-binary_dir="${RELEASETOOLS_BINARY_DIR:-$HOME/.local/bin}"
+binary_dir="$(base::_symlink_binary_location)"
 readonly binary_dir
 
 echo "Adding the binary location ($binary_dir) to GITHUB_PATH" >&2
