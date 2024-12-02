@@ -12,6 +12,8 @@ set -euo pipefail
 
 if command -v curl >/dev/null 2>&1; then
   echo "curl is available, downloading the script ($VERSION)..." >&2
+  curl -sSL "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh"
+  bash --version
   # shellcheck source=/dev/null
   . <(curl -sSL "https://github.com/releasetools/cli/releases/download/${VERSION}/install.sh")
 elif command -v wget >/dev/null 2>&1; then
