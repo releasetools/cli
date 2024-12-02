@@ -21,7 +21,9 @@ else
   exit 1
 fi
 
-binary_dir="$(base::_symlink_binary_location)"
+# Determine the location where the binary was installed
+binary_dir="${RELEASETOOLS_BINARY_DIR:-$HOME/.local/bin}"
 readonly binary_dir
+
 echo "Adding the binary location ($binary_dir) to GITHUB_PATH" >&2
 echo "$binary_dir" >>"$GITHUB_PATH"

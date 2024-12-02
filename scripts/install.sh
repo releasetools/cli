@@ -37,11 +37,7 @@ readonly SCRIPT_URL
 INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-}"
 if [ -z "${INSTALL_DIR-}" ]; then
   # Set a default value, if the variable is not set
-  if [ "$(uname)" = "Darwin" ]; then
-    INSTALL_DIR="$HOME/Library/Application Support/$PROJECT_PATH/$VERSION"
-  else
-    INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
-  fi
+  INSTALL_DIR="$HOME/.local/share/$PROJECT_PATH/$VERSION"
 fi
 
 # Ensure the directory exists
@@ -101,11 +97,6 @@ fi
 # Symlink the binary
 BINARY_DIR="$(base::_symlink_binary_location)"
 readonly BINARY_DIR
-
-# Ensure the directory exists
-if [ ! -d "$BINARY_DIR" ]; then
-  mkdir -p "$BINARY_DIR" >&2
-fi
 
 echo "Linking binary to $BINARY_DIR/$EXEC_NAME..." >&2
 ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$EXEC_NAME" >&2
