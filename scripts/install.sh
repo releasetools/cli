@@ -50,45 +50,49 @@ INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd -P)"
 readonly INSTALL_DIR
 
 # If the script doesn't exist, download it
-if [ ! -r "$INSTALL_DIR/$NAME" ]; then
-  # Download the script
-  echo "Downloading the script and sha256 checksum from $SCRIPT_URL..." >&2
-  if command -v curl >/dev/null 2>&1; then
-    curl -sSL -o "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
-    curl -sSL -o "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
-  elif command -v wget >/dev/null 2>&1; then
-    wget -q -O "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
-    wget -q -O "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
-  else
-    echo "ERROR: curl or wget are needed to install the script." >&2
-    exit 1
-  fi
-
-  # Check if the script was downloaded successfully
-  if [ ! -f "$INSTALL_DIR/$NAME" ]; then
-    echo "ERROR: Failed to download the script." >&2
-    exit 1
-  fi
-
-  # Check if the checksum file was downloaded successfully
-  if [ ! -f "$INSTALL_DIR/$NAME.sha256" ]; then
-    echo "ERROR: Failed to download the checksum file." >&2
-    exit 1
-  fi
-
-  # Perform checksum verification
-  cwd="$(pwd -P)"
-  cd "$INSTALL_DIR" >&2
-  sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
-  cd "$cwd" >&2 # return to the previous directory
-
-  # Make the script executable
-  chmod +x "$INSTALL_DIR/$NAME" >&2
-
-  echo "$PROJECT_PATH/$VERSION has been downloaded and verified successfully." >&2
-  echo "It was installed at: $INSTALL_DIR/$NAME" >&2
-  echo "" >&2
+if [ -r "$INSTALL_DIR/$NAME" ]; then
+  echo "$INSTALL_DIR/$NAME already exists. Cannot continue." >&2
+  ls -al "$INSTALL_DIR"
+  exit 1
 fi
+
+# Download the script
+echo "Downloading the script and sha256 checksum from $SCRIPT_URL..." >&2
+if command -v curl >/dev/null 2>&1; then
+  curl -sSL -o "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+  curl -sSL -o "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
+elif command -v wget >/dev/null 2>&1; then
+  wget -q -O "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+  wget -q -O "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
+else
+  echo "ERROR: curl or wget are needed to install the script." >&2
+  exit 1
+fi
+
+# Check if the script was downloaded successfully
+if [ ! -f "$INSTALL_DIR/$NAME" ]; then
+  echo "ERROR: Failed to download the script." >&2
+  exit 1
+fi
+
+# Check if the checksum file was downloaded successfully
+if [ ! -f "$INSTALL_DIR/$NAME.sha256" ]; then
+  echo "ERROR: Failed to download the checksum file." >&2
+  exit 1
+fi
+
+# Perform checksum verification
+cwd="$(pwd -P)"
+cd "$INSTALL_DIR" >&2
+sha256sum -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
+cd "$cwd" >&2 # return to the previous directory
+
+# Make the script executable
+chmod +x "$INSTALL_DIR/$NAME" >&2
+
+echo "$PROJECT_PATH/$VERSION has been downloaded and verified successfully." >&2
+echo "It was installed at: $INSTALL_DIR/$NAME" >&2
+echo "" >&2
 
 # Source releasetools/cli
 # shellcheck source=/dev/null

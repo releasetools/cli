@@ -26,7 +26,6 @@ jobs:
           - ubuntu-24.04
           - ubuntu-22.04
           - macos-15
-
     runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
