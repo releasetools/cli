@@ -94,6 +94,9 @@ function git::latest_version() {
 # Note: major version tags will always be overwritten if they exists.
 #
 function git::release() {
+    local should_push
+    local should_tag_major
+    local force_flag
     local version
 
     # Determine if the tag should be pushed to remote
