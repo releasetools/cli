@@ -34,16 +34,11 @@ function base::_symlink_binary_location() {
   local dir
 
   # Allow customizing the binaries' location
-  dir="${RELEASETOOLS_BINARY_DIR-}"
-  if [ -z "${dir-}" ]; then
-    # Set a default value, if the variable is not set
-    dir="$HOME/.local/bin"
-  fi
+  # Set a default value, if the variable is not set
+  dir="${RELEASETOOLS_BINARY_DIR:-$HOME/.local/bin}"
 
   # Ensure the directory exists
-  if [ ! -d "$dir" ]; then
-    mkdir -p "$dir" >&2
-  fi
+  mkdir -p "$dir" >&2
 
   # Ensure the variable is resolved to the absolute path
   dir="$(cd "$dir" && pwd -P)"

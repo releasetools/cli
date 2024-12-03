@@ -117,6 +117,6 @@ chmod +x "$OUTPUT_FILE"
 # Generate the checksum
 CHECKSUM_FILE="$OUTPUT_FILE.sha256"
 pushd "$(dirname "$OUTPUT_FILE")" >&2 >/dev/null || exit 1
-sha256sum "$(basename "$OUTPUT_FILE")" >"$CHECKSUM_FILE"
+shasum -a 256 "$(basename "$OUTPUT_FILE")" >"$CHECKSUM_FILE"
 echo "Checksum stored in '$CHECKSUM_FILE'." >&2
 popd >&2 >/dev/null || exit 1
