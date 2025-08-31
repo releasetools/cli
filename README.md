@@ -12,13 +12,18 @@ More utilities are coming as I centralize various scripts from my repositories.
 1\. Install the tools
 
 ```shell
+# curl
 bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/v0.0.11/install.sh")
+
+# or wget
+bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.11/install.sh")
 ```
 
-Or alternatively, with `wget`:
+Or alternatively, with `brew`:
 
 ```shell
-bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.11/install.sh")
+brew tap releasetools/tap
+brew install rt
 ```
 
 The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
