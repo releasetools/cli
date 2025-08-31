@@ -96,26 +96,32 @@ function git::latest_version() {
 function git::release() {
     local should_push
     local should_tag_major
+    local sign_flag
     local force_flag
     local version
 
     # Determine if the tag should be pushed to remote
     should_push=false
     should_tag_major=false
+    sign_flag=""
     force_flag=""
     version=""
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
+        -m | --major)
+            should_tag_major=true
+            shift
+            ;;
+        -s | --sign)
+            sign_flag="--sign"
+            shift
+            ;;
         -p | --push)
             should_push=true
             shift
             ;;
         -f | --force)
             force_flag="--force"
-            shift
-            ;;
-        -m | --major)
-            should_tag_major=true
             shift
             ;;
         *)
@@ -137,7 +143,7 @@ function git::release() {
 
     # Create the tag
     echo "Tagging the HEAD commit with '$version'" >&2
-    git tag -a "$version" -m "Release $version" $force_flag
+    git tag -a "$version" -m "Release $version" $force_flag $sign_flag
 
     # If --push was specified, push the tag to the remote
     if [ "$should_push" = true ]; then
@@ -147,7 +153,7 @@ function git::release() {
     # Tag the latest major version
     if [ "$should_tag_major" = true ]; then
         major="${version%%.*}"
-        git tag --force -a -m "Release $version" "$major"
+        git tag --force -a "$major" -m "Release $version" $sign_flag
 
         # If --push was specified, push the tag to the remote
         if [ "$should_push" = true ]; then
