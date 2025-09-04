@@ -97,7 +97,7 @@ jobs:
         run: |
           bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/${{ env.VERSION }}/install.sh")
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install release tools dependencies
         run: |
