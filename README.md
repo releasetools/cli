@@ -20,10 +20,10 @@ Or alternatively, with `brew`:
 
 ```shell
 brew tap releasetools/tap
-brew install rt
+brew install releasetools-cli
 ```
 
-The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
+The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/releasetools`.
 
 2\. Utilize the _releasetools_ library
 
@@ -32,15 +32,15 @@ The tools will by default be installed to `~/.local/share/releasetools/cli/VERSI
 export PATH=~/.local/bin:"$PATH"
 
 # You can run commands, e.g.:
-rt base::::version
+releasetools base::::version
 # vX.Y.Z
 
 # Optionally, check that all dependencies for all modules are correctly installed
-rt base::check_deps
+releasetools base::check_deps
 # Ok.
 
 # You can also check the install location
-rt base::install_location
+releasetools base::install_location
 # /Users/user/.local/share/releasetools/cli/vX.Y.Z/releasetools.bash
 ```
 
@@ -83,7 +83,7 @@ steps:
   # Customizations
   # with:
   #   # Pin a specific version (defaults to latest)
-  #   version: "v0.0.11"
+  #   version: "v0.0.12"
   # env:
   #   # Configure the installation directory
   #   RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
@@ -91,7 +91,7 @@ steps:
   #   RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
 
   # Check that `releasetools` was installed correctly
-  - run: rt base::check_deps
+  - run: releasetools base::check_deps
 ```
 
 > **NOTE:** Release tools uses `python` for certain actions. When installed as part of a workflow,
