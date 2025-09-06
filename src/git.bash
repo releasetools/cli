@@ -2,7 +2,7 @@
 #
 # git.bash - git-related helpers for bash
 #
-# Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
+# Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0
@@ -21,7 +21,7 @@ function git::_internal_check_deps() {
     fi
 }
 
-# Checks if the current Git working directory contains uncommited changes.
+# Checks if the current Git working directory contains uncommitted changes.
 #
 # Prints nothing if the working directory is clean, '-dirty' otherwise.
 function git::is_dirty() {

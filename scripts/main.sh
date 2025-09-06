@@ -2,7 +2,7 @@
 #
 # main.sh - wrapper script for releasetools/cli
 #
-# Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
+# Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0
@@ -47,7 +47,7 @@ function _init_functions() {
 # Initialize the list of known functions
 known_functions=()
 while IFS='' read -r fn; do known_functions+=("$fn"); done < <(_init_functions)
-known_functions+=("version")  # display the 'version'
+known_functions+=("version") # display the 'version'
 readonly known_functions
 
 # Lists defined commands from all namespaces

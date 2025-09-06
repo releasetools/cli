@@ -2,9 +2,6 @@
 
 This toolkit represents a collection of bash scripts for various purposes.
 
-At the time of this writing (2024-10-12) this is WIP.
-More utilities are coming as I centralize various scripts from my repositories.
-
 > Any and all contributions are welcome; just open a PR.
 
 ## Quickstart
@@ -105,7 +102,7 @@ If the workflow also needs python, it is recommended to install it before releas
 ```yaml
 steps:
   # Install Python first, to avoid having to install dependencies separately
-  - uses: actions/setup-python@v5
+  - uses: actions/setup-python@v6
     with:
       python-version: "..."
 
@@ -121,7 +118,7 @@ Once you have completed and tested the code, see the [release instructions](./sc
 
 ## License
 
-Copyright &copy; 2024 Mihai Bojin
+Copyright &copy; 2025 Mihai Bojin
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
