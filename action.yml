@@ -5,7 +5,7 @@ inputs:
   version:
     description: "The version to install, defaults to the latest release"
     required: false
-    default: "v0"
+    default: "v0.0.12"
 
 runs:
   using: "composite"
