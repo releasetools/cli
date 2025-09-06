@@ -27,7 +27,7 @@ readonly PROJECT_PATH
 NAME="releasetools.bash"
 readonly NAME
 # The name of the symlinked executable that will be run by users
-EXEC_NAME="rt"
+EXEC_NAME="releasetools"
 readonly EXEC_NAME
 
 # Define URLs for the script and its checksum file
