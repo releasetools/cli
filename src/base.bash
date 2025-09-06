@@ -6,7 +6,7 @@
 #       and not meant as a generic catch-all module for functions
 #       without a namespaace.
 #
-# Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
+# Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0

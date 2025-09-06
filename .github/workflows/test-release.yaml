@@ -27,8 +27,8 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          rt version
-          rt base::check_deps
+          releasetools version
+          releasetools base::check_deps
 
   test-explicit-version:
     name: Test install current tag
@@ -53,8 +53,8 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          rt version
-          rt base::check_deps
+          releasetools version
+          releasetools base::check_deps
 
   test-customizations:
     name: Test customizations
@@ -69,8 +69,8 @@ jobs:
       - name: Ensure the release tools are installed and working
         shell: bash
         run: |
-          ${{ runner.temp }}/bin/rt version
-          ${{ runner.temp }}/bin/rt base::check_deps
+          ${{ runner.temp }}/bin/releasetools version
+          ${{ runner.temp }}/bin/releasetools base::check_deps
 
   test-manual-install:
     name: Test manual install
@@ -107,8 +107,8 @@ jobs:
       - name: Ensure the release tools are installed and working
         shell: bash
         run: |
-          ${{ runner.temp }}/bin/rt version
-          ${{ runner.temp }}/bin/rt base::check_deps
+          ${{ runner.temp }}/bin/releasetools version
+          ${{ runner.temp }}/bin/releasetools base::check_deps
 
   test-platforms:
     name: Test on multiple platforms
@@ -141,5 +141,5 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          rt version
-          rt base::check_deps
+          releasetools version
+          releasetools base::check_deps

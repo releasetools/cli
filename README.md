@@ -2,9 +2,6 @@
 
 This toolkit represents a collection of bash scripts for various purposes.
 
-At the time of this writing (2024-10-12) this is WIP.
-More utilities are coming as I centralize various scripts from my repositories.
-
 > Any and all contributions are welcome; just open a PR.
 
 ## Quickstart
@@ -23,10 +20,10 @@ Or alternatively, with `brew`:
 
 ```shell
 brew tap releasetools/tap
-brew install rt
+brew install releasetools-cli
 ```
 
-The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/rt`.
+The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/releasetools`.
 
 2\. Utilize the _releasetools_ library
 
@@ -35,15 +32,15 @@ The tools will by default be installed to `~/.local/share/releasetools/cli/VERSI
 export PATH=~/.local/bin:"$PATH"
 
 # You can run commands, e.g.:
-rt base::::version
+releasetools base::::version
 # vX.Y.Z
 
 # Optionally, check that all dependencies for all modules are correctly installed
-rt base::check_deps
+releasetools base::check_deps
 # Ok.
 
 # You can also check the install location
-rt base::install_location
+releasetools base::install_location
 # /Users/user/.local/share/releasetools/cli/vX.Y.Z/releasetools.bash
 ```
 
@@ -86,7 +83,7 @@ steps:
   # Customizations
   # with:
   #   # Pin a specific version (defaults to latest)
-  #   version: "v0.0.11"
+  #   version: "v0.0.12"
   # env:
   #   # Configure the installation directory
   #   RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
@@ -94,7 +91,7 @@ steps:
   #   RELEASETOOLS_BINARY_DIR: /home/runner/.local/bin
 
   # Check that `releasetools` was installed correctly
-  - run: rt base::check_deps
+  - run: releasetools base::check_deps
 ```
 
 > **NOTE:** Release tools uses `python` for certain actions. When installed as part of a workflow,
@@ -105,7 +102,7 @@ If the workflow also needs python, it is recommended to install it before releas
 ```yaml
 steps:
   # Install Python first, to avoid having to install dependencies separately
-  - uses: actions/setup-python@v5
+  - uses: actions/setup-python@v6
     with:
       python-version: "..."
 
@@ -121,7 +118,7 @@ Once you have completed and tested the code, see the [release instructions](./sc
 
 ## License
 
-Copyright &copy; 2024 Mihai Bojin
+Copyright &copy; 2025 Mihai Bojin
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

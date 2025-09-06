@@ -2,7 +2,7 @@
 #
 # git.bash - git-related helpers for bash
 #
-# Copyright (c) 2024 Mihai Bojin, https://MihaiBojin.com/
+# Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #
 # Licensed under the Apache License, Version 2.0
 #   http://www.apache.org/licenses/LICENSE-2.0
@@ -10,28 +10,28 @@
 
 # Test to ensure that all required utilities are installed.
 function github::_internal_check_deps() {
-    return 0
+  return 0
 }
 
 # Determines if the current git reference is a version tag.
 # Returns the semantic version prefixed with 'v' if the reference is a tag,
 # or exits with an error message.
-# 
+#
 # Usage: github::get_version [--env]
 #       --env: appends VERSION=v#.#.# to the file specified by the GITHUB_ENV environment variable
 function github::get_version() {
   local store_to_github_env
   while [[ "$#" -gt 0 ]]; do
     case "$1" in
-      --env)
-        store_to_github_env=true
-        shift
-        ;;
-      *)
-        echo "Unknown parameter passed: $1" >&2
-        exit 1
-        ;;
-      esac
+    --env)
+      store_to_github_env=true
+      shift
+      ;;
+    *)
+      echo "Unknown parameter passed: $1" >&2
+      exit 1
+      ;;
+    esac
   done
 
   # Determine if the GITHUB_REF environment variable is set
@@ -71,7 +71,7 @@ function github::get_version() {
         echo "GITHUB_ENV is not set. Cannot continue." >&2
         exit 1
       fi
-      echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      echo "VERSION=$VERSION" >>"$GITHUB_ENV"
     fi
     echo "$VERSION"
   else
