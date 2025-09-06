@@ -10,10 +10,10 @@ This toolkit represents a collection of bash scripts for various purposes.
 
 ```shell
 # curl
-bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/v0.0.11/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/v0.0.12/install.sh")
 
 # or wget
-bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.11/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.12/install.sh")
 ```
 
 Or alternatively, with `brew`:
