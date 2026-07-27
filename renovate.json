@@ -1,6 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>releasetools/.github"
+    "github>MihaiBojin/renovate",
+    "github>MihaiBojin/renovate:group-github-actions",
+    "github>MihaiBojin/renovate:lock-file-maintenance",
+    "helpers:pinGitHubActionDigests"
   ]
 }
