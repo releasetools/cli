@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: wait-for-release
     steps:
-      - uses: releasetools/cli@v0
+      - uses: releasetools/cli@964f2bb77ea50d9c1c9aa70e9cb2e7c19212c8a6 # v0
       - name: Run tests
         shell: bash
         run: |
@@ -47,7 +47,7 @@ jobs:
             echo "No matching version found" >&2
             exit 1
           fi
-      - uses: releasetools/cli@v0
+      - uses: releasetools/cli@964f2bb77ea50d9c1c9aa70e9cb2e7c19212c8a6 # v0
         with:
           version: ${{ env.VERSION }}
       - name: Run Tests
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: wait-for-release
     steps:
-      - uses: releasetools/cli@v0
+      - uses: releasetools/cli@964f2bb77ea50d9c1c9aa70e9cb2e7c19212c8a6 # v0
         env:
           RELEASETOOLS_INSTALL_DIR: /opt/hostedtoolcache/releasetools
           RELEASETOOLS_BINARY_DIR: ${{ runner.temp }}/bin
@@ -135,7 +135,7 @@ jobs:
             echo "No matching version found" >&2
             exit 1
           fi
-      - uses: releasetools/cli@v0
+      - uses: releasetools/cli@964f2bb77ea50d9c1c9aa70e9cb2e7c19212c8a6 # v0
         with:
           version: ${{ env.VERSION }}
       - name: Run tests
