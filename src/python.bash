@@ -24,10 +24,9 @@ function python::_internal_check_deps() {
 
 # Extracts the project name as configured in 'pyproject.toml'
 function python::project_name() {
-    local dir
-    if [[ -n "$1" ]]; then
-        dir="$1"
-    fi
+    # Defaulted: the library runs under 'set -u', so a bare "$1" made calling this with no
+    # arguments die on an unbound variable instead of printing the message below.
+    local dir="${1-}"
 
     # error out if dir is not set
     if [[ ! -d "$dir" ]]; then
@@ -41,5 +40,8 @@ function python::project_name() {
         return 1
     fi
 
-    python -c "import toml; print(toml.load('$dir/pyproject.toml')['project']['name'])"
+    # The path is passed as an argument rather than interpolated into the source, so a
+    # directory containing a quote character cannot break or inject into the snippet.
+    python -c "import sys, toml; print(toml.load(sys.argv[1])['project']['name'])" \
+        "$dir/pyproject.toml"
 }

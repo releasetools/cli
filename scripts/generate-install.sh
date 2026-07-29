@@ -35,6 +35,11 @@ source "$DIR/src/git.bash"
 # Determine the version
 VERSION="$(git::version_or_sha)"
 
-echo "Injecting version $VERSION into $INPUT_SCRIPT..." >&2
-sed "s/{{version}}/$VERSION/g" "$INPUT_SCRIPT" >"$OUTPUT_FILE"
+# Escaped for use as a sed replacement, matching generate-dist.sh: an unescaped '&' in the
+# version silently expanded to the whole match, and a '/' made sed fail mid-file.
+ESCAPED_VERSION="$(printf '%s' "$VERSION" | sed -e 's/[\/&\\]/\\&/g')"
+readonly ESCAPED_VERSION
+
+echo "Injecting version $VERSION into $(basename "$OUTPUT_FILE")..." >&2
+sed "s/{{version}}/$ESCAPED_VERSION/g" "$INPUT_SCRIPT" >"$OUTPUT_FILE"
 chmod +x "$OUTPUT_FILE" >&2
