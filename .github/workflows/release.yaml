@@ -38,3 +38,22 @@ jobs:
             dist/releasetools.bash.sha256
             dist/install.sh
             README.md
+
+      # The tap bumps its formula from this release. It also polls daily, so this only
+      # shortens the delay -- which is why a missing token is a notice, not a failure.
+      # GITHUB_TOKEN cannot dispatch to another repository; HOMEBREW_TAP_TOKEN needs
+      # 'contents: write' on releasetools/homebrew-tap.
+      - name: Notify the Homebrew tap
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::notice::HOMEBREW_TAP_TOKEN is not set; the tap will pick up $VERSION on its next scheduled run."
+            exit 0
+          fi
+
+          gh api --method POST repos/releasetools/homebrew-tap/dispatches \
+            -f event_type=upstream-released \
+            -f "client_payload[version]=$VERSION"
