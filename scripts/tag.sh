@@ -18,4 +18,20 @@ readonly DIR
 # shellcheck source=/dev/null
 source "$DIR/src/git.bash"
 
+# Find the semver argument, using the same shape git::release accepts. If there isn't one,
+# leave the diagnostic to git::release rather than reporting it twice.
+version=""
+for arg in "$@"; do
+  if [[ "$arg" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    version="$arg"
+    break
+  fi
+done
+
+# Checked before the tag is created, so a stale action.yml costs an edit rather than a
+# force-moved tag and a released distributable nobody installs.
+if [ -n "$version" ]; then
+  "$DIR/scripts/assert-action-version.sh" "$version"
+fi
+
 git::release "$@"

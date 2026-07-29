@@ -17,6 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      # Runs before the dist is built, so a stale default fails the release instead of
+      # publishing one that every 'uses: releasetools/cli@v0' consumer ignores.
+      - name: Verify action.yml matches the tag
+        run: scripts/assert-action-version.sh "$GITHUB_REF_NAME"
+        if: startsWith(github.ref, 'refs/tags/')
+
       - name: Build the dist
         run: make all
         if: startsWith(github.ref, 'refs/tags/')
