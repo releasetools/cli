@@ -5,5 +5,13 @@
     "github>MihaiBojin/renovate:group-github-actions",
     "github>MihaiBojin/renovate:lock-file-maintenance",
     "helpers:pinGitHubActionDigests"
+  ],
+  "packageRules": [
+    {
+      "description": "Never pin this repository's own action. test-release.yaml exists to verify what a consumer referencing 'releasetools/cli@v0' actually gets, and git::release --major force-moves the v0 tag onto every release. A digest pin would freeze the self-test to the previous release's action code and its baked-in action.yml default version, so the job would validate the previous release while reporting success for the new one.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["releasetools/cli"],
+      "pinDigests": false
+    }
   ]
 }
