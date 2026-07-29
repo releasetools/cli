@@ -32,7 +32,7 @@ The tools will by default be installed to `~/.local/share/releasetools/cli/VERSI
 export PATH=~/.local/bin:"$PATH"
 
 # You can run commands, e.g.:
-releasetools base::::version
+releasetools version
 # vX.Y.Z
 
 # Optionally, check that all dependencies for all modules are correctly installed

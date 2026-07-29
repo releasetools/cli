@@ -45,9 +45,17 @@ readonly VERSION
 
 # Parses a module, applying any required post-processing
 function _parse_module() {
-  # Do not include the shebang line
-  # And replace the version placeholder
-  sed '/^#!\/usr\/bin\/env bash/d' "$1" | sed "s/{{version}}/$VERSION/g"
+  # Do not include the shebang line, and replace the version placeholder.
+  #
+  # The shebang deletion is anchored to line 1: unanchored, it also deleted matching lines
+  # from the middle of a module (inside a heredoc, for instance), silently.
+  #
+  # The version is escaped for use as a sed replacement, so a version containing '/' or '&'
+  # cannot corrupt the substitution.
+  local escaped_version
+  escaped_version="$(printf '%s' "$VERSION" | sed -e 's/[\/&\\]/\\&/g')"
+
+  sed '1{/^#!\/usr\/bin\/env bash$/d;}' "$1" | sed "s/{{version}}/$escaped_version/g"
 }
 
 echo "Concatenating modules into '$OUTPUT_FILE', version '$VERSION'." >&2
@@ -94,11 +102,20 @@ echo "Adding base::check_deps()" >&2
 {
   echo ""
   echo "# Ensure all dependencies are installed"
+  echo "#"
+  echo "# Every namespace is checked, so a single failure does not hide the rest, and the"
+  echo "# accumulated status is returned. The previous form ended each line with a subshell"
+  echo "# ('|| ( ... && exit 1 )'), whose 'exit' could only leave the subshell -- so the"
+  echo "# function reported 'Ok.' and returned 0 wherever 'set -e' was suppressed."
   echo "function base::check_deps() {"
+  echo "  local rc=0"
   for m in "${modules[@]}"; do
-    echo "  $m::_internal_check_deps || (echo \"ERROR: $m::_internal_check_deps\" >&2 && exit 1)"
+    echo "  $m::_internal_check_deps || { echo \"ERROR: $m::_internal_check_deps\" >&2; rc=1; }"
   done
-  echo "echo \"Ok.\" >&2"
+  echo "  if [ \"\$rc\" -ne 0 ]; then"
+  echo "    return \"\$rc\""
+  echo "  fi"
+  echo "  echo \"Ok.\" >&2"
   echo "}"
   echo ""
 } >>"$OUTPUT_FILE"
@@ -116,7 +133,7 @@ chmod +x "$OUTPUT_FILE"
 
 # Generate the checksum
 CHECKSUM_FILE="$OUTPUT_FILE.sha256"
-pushd "$(dirname "$OUTPUT_FILE")" >&2 >/dev/null || exit 1
+pushd "$(dirname "$OUTPUT_FILE")" >/dev/null || exit 1
 shasum -a 256 "$(basename "$OUTPUT_FILE")" >"$CHECKSUM_FILE"
 echo "Checksum stored in '$CHECKSUM_FILE'." >&2
-popd >&2 >/dev/null || exit 1
+popd >/dev/null || exit 1

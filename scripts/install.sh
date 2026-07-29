@@ -80,7 +80,13 @@ fi
 # Perform checksum verification
 cwd="$(pwd -P)"
 cd "$INSTALL_DIR" >&2
-shasum -a 256 -c "$NAME.sha256" >&2 >/dev/null || (echo "Checksum verification failed!" >&2 && exit 1)
+# The 'exit 1' has to run in this shell, not a subshell, to actually abort the install.
+# Only stdout is discarded: shasum's own diagnostic on stderr is the reason a verification
+# failed, and it is the only clue available inside a GitHub Actions step.
+if ! shasum -a 256 -c "$NAME.sha256" >/dev/null; then
+  echo "Checksum verification failed!" >&2
+  exit 1
+fi
 cd "$cwd" >&2 # return to the previous directory
 
 # Make the script executable
