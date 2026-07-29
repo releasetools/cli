@@ -10,11 +10,14 @@ This toolkit represents a collection of bash scripts for various purposes.
 
 ```shell
 # curl
-bash <(curl -sSL "https://github.com/releasetools/cli/releases/download/v0.0.12/install.sh")
+bash <(curl -sSL "https://github.com/releasetools/cli/releases/latest/download/install.sh")
 
 # or wget
-bash <(wget -q -O- "https://github.com/releasetools/cli/releases/download/v0.0.12/install.sh")
+bash <(wget -q -O- "https://github.com/releasetools/cli/releases/latest/download/install.sh")
 ```
+
+> These URLs always resolve to the most recent release. To install a specific version,
+> replace `latest/download` with `download/vX.Y.Z`.
 
 Or alternatively, with `brew`:
 
@@ -82,8 +85,8 @@ steps:
 
   # Customizations
   # with:
-  #   # Pin a specific version (defaults to latest)
-  #   version: "v0.0.12"
+  #   # Pin a specific version (defaults to the version this action was released with)
+  #   version: "vX.Y.Z"
   # env:
   #   # Configure the installation directory
   #   RELEASETOOLS_INSTALL_DIR: /home/runner/.local/share
