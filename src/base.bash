@@ -23,8 +23,19 @@ function base::_version() {
 }
 
 # Returns the absolute path to where the release tools have been installed.
+#
+# Requires bash. Defaulting BASH_SOURCE would only hide the problem: zsh sets '$0' to
+# the name of the running function, so 'dirname' would resolve against the current
+# directory and this would print the caller's cwd with a success code. There is no
+# correct value to fall back to, so refuse instead of answering wrongly.
 function base::install_location() {
   local dir
+
+  if [ -z "${BASH_SOURCE[0]-}" ]; then
+    echo "ERROR: base::install_location requires bash." >&2
+    return 1
+  fi
+
   dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
   echo "$dir"
 }
