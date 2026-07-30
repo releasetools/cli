@@ -8,7 +8,7 @@ inputs:
     # scripts/assert-action-version.sh keeps it equal to the tag being released.
     description: "The version to install, defaults to the release this action ships with"
     required: false
-    default: "v0.0.13"
+    default: "v0.0.14"
 
 runs:
   using: "composite"
