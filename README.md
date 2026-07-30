@@ -97,10 +97,12 @@ steps:
   - run: releasetools base::check_deps
 ```
 
-> **NOTE:** Release tools uses `python` for certain actions. When installed as part of a workflow,
-> it will attempt to install the [required dependencies](/requirements.txt), if `pip` is available in the `PATH`.
+> **NOTE:** the `python::` module needs a `python3` (or `python`) on the `PATH`. It reads
+> TOML with `tomllib`, which is in the standard library from python 3.11, so there is
+> nothing to install. Older interpreters fall back to the third-party `toml` package.
+> Every other module works without python at all.
 
-If the workflow also needs python, it is recommended to install it before releasetools, e.g.:
+If the workflow needs a specific python, install it before releasetools, e.g.:
 
 ```yaml
 steps:
