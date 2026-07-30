@@ -108,7 +108,13 @@ function version() {
 
 # If the script is executed directly, run the specified function
 # This enables the script to be both sourced and executed, depending on context
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+#
+# BASH_SOURCE is defaulted because this is the last statement in the concatenated
+# distributable: unset, under 'set -u', it aborted the source here, so a shell that does
+# not populate it lost the banner and got a 126 back from an otherwise working 'source'.
+# An empty value is also the right answer, since it cannot equal "$0" for a script that
+# was executed directly.
+if [[ "${BASH_SOURCE[0]-}" == "${0}" ]]; then
   _main "$@"
 else
   # Sourcing the script gives access to the private/internal functions
