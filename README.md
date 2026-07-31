@@ -97,23 +97,8 @@ steps:
   - run: releasetools base::check_deps
 ```
 
-> **NOTE:** the `python::` module needs a `python3` (or `python`) on the `PATH`. It reads
-> TOML with `tomllib`, which is in the standard library from python 3.11, so there is
-> nothing to install. Older interpreters fall back to the third-party `toml` package.
-> Every other module works without python at all.
-
-If the workflow needs a specific python, install it before releasetools, e.g.:
-
-```yaml
-steps:
-  # Install Python first, to avoid having to install dependencies separately
-  - uses: actions/setup-python@v6
-    with:
-      python-version: "..."
-
-  # Will install releasetools and necessary python dependencies
-  - uses: releasetools/cli@v0
-```
+> **NOTE:** there is nothing to install alongside it. Every module is bash over `git`,
+> `gh` and coreutils, so the action is a single download-and-link step.
 
 ## Developers
 
