@@ -13,11 +13,35 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # No dependency install step: python:: reads pyproject.toml with tomllib, which is in
-    # the standard library from python 3.11, so there is nothing left to install.
     - name: Install the release tools
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
       run: |
         ${{ github.action_path }}/scripts/action-install.sh
+
+    # python:: reads TOML with tomllib, which is in the standard library from python 3.11,
+    # so this is a no-op on any current runner. It exists for the ones that are not:
+    # ubuntu-22.04 still ships 3.10, where the library falls back to the third-party
+    # 'toml' and cannot work without it. Asking the library itself keeps the condition in
+    # one place instead of duplicating the probe here.
+    - name: Install a TOML reader if the interpreter has none
+      shell: bash
+      run: |
+        if releasetools python::_internal_check_deps >/dev/null 2>&1; then
+          exit 0
+        fi
+
+        if ! command -v pip >/dev/null 2>&1; then
+          echo "::notice::The python:: module cannot read TOML here and pip is unavailable. Every other module still works."
+          exit 0
+        fi
+
+        echo "Interpreter has no tomllib; installing 'toml' as a fallback..." >&2
+        pip install --user toml
+
+        # Report rather than fail: only python::project_name needs this, and failing the
+        # install step would take out workflows that never touch the python:: module.
+        if ! releasetools python::_internal_check_deps >/dev/null 2>&1; then
+          echo "::notice::Installed 'toml' but the python:: module still cannot read TOML. Every other module still works."
+        fi
