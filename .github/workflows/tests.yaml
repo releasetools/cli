@@ -1,0 +1,38 @@
+name: Tests
+
+# Every pull request, whatever it targets, and every push to main. The other two workflows
+# here trigger on 'v0.*' tags, so until this existed nothing ran shellcheck over a change
+# before it merged: a pull request reached the merge button with no check having read a
+# line of bash.
+on:
+  # No branch filter on pull requests. One stacked on another has a base that is not main,
+  # and a filter here silently skips it: #42 reached review with no check having run.
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: shellcheck and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # 'make test' shellchecks dist/ alongside src/ and scripts/, so the distributable has
+      # to exist first. Building it also exercises generate-dist.sh and generate-install.sh,
+      # which nothing outside a release run otherwise does.
+      #
+      # A pull request checkout carries no tags, so git::version_or_sha stamps the build
+      # with the short SHA. That is the intended fallback, not a failure.
+      - name: Build the dist
+        run: make all
+
+      # shellcheck 0.9.0 ships with the runner image, so there is nothing to install and no
+      # third-party action in the path.
+      - name: Run shellcheck and the smoke test
+        run: make test
