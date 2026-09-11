@@ -12,6 +12,38 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:draft <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
+## 0.2.0 - 2026-09-11
+
+### Changed
+
+- `git::is_dirty` answers with its exit status instead of printing a string. It exits 0
+  when the working tree has uncommitted changes, 1 when it is clean, and prints nothing.
+
+  **This breaks any caller that read the printed suffix.** Build it from the answer:
+
+  ```bash
+  if rt git::is_dirty; then sha="$sha-dirty"; fi
+  ```
+
+  It used to print `-dirty` or an empty line and exit 0 either way, so the call its name
+  invites ran its body whatever the tree looked like:
+
+  ```console
+  $ rt git::is_dirty && echo "DIRTY" || echo "clean"
+  DIRTY          # on a clean tree
+  ```
+
+  A working tree that cannot be read is now reported as dirty, with the reason on stderr.
+  `git::head_sha` is unaffected and still prints `8a7a7b6-dirty`.
+
+### Choices
+
+Renaming it to say what it returned, `git::dirty_suffix`, would have kept every caller
+working. The predicate won because both callers here wanted a yes or no rather than the
+string, and a code search across every org and then globally found none outside this
+repository. The rename would have left a command that reads as a question and cannot be
+used as one, under a longer name.
+
 ## 0.1.0 - 2026-09-11
 
 ### Added
