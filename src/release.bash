@@ -192,7 +192,7 @@ function release::prechecks() {
     case "$status" in
     0) ;;
     1)
-        echo "ERROR: the newest release is ${latest#v}; $version is not after it." >&2
+        echo "ERROR: the newest release is $latest; $version is not after it." >&2
         return 1
         ;;
     *)
@@ -234,5 +234,5 @@ function release::prechecks() {
         esac
     fi
 
-    echo "${latest#v} -> $version, and v$version is free." >&2
+    echo "$latest -> $version, and v$version is free." >&2
 }

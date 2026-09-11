@@ -129,11 +129,11 @@ they do not carry, and any other answer is a refusal rather than a guess.
 ## Versions and state
 
 ```shell
-# The release tag on HEAD, 'v' removed, empty when HEAD carries none
+# The highest release tag on HEAD, empty when it carries none
 rt git::version_tag
-# 1.2.3
+# v1.2.3
 
-# The same with the 'v' back on, or the short SHA when HEAD carries no tag
+# The same, or the short SHA when HEAD carries no tag
 rt git::version_or_sha
 # v1.2.3
 
@@ -145,10 +145,14 @@ rt git::head_sha
 # answers with its exit status.
 rt git::is_dirty && echo "commit first"
 
-# The newest release tag on the remote this repository belongs to
+# The newest release version on the remote this repository belongs to
 rt git::latest_version
-# v1.2.3
+# 1.2.3
 ```
+
+The name says the prefix. A `*_tag` gives back what `git tag` accepts, `v1.2.3`, and a
+`*_version` gives back what a manifest, a chart and a package index carry, `1.2.3`. Every
+command that takes one accepts either form.
 
 ## Tagging a release
 
