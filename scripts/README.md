@@ -32,8 +32,12 @@ version has no section, so this is not optional.
 3\. Tag and push.
 
 ```shell
-scripts/tag.sh vX.Y.Z --push # X, Y, Z are integers
+scripts/tag.sh vX.Y.Z --major --sign --push # X, Y, Z are integers
 ```
+
+`--major` is what moves `v0` onto the new release, and `uses: releasetools/cli@v0` resolves
+through that tag, so without it every consumer keeps the previous release no matter what
+step 1 said. `--sign` because every release tag here carries a signature.
 
 4\. Watch `release.yaml`, then `test-release.yaml`.
 
