@@ -5,10 +5,18 @@ on:
     tags:
       - "v0.*"
 
+# The installer downloads a public release asset over unauthenticated HTTPS, so every job
+# that only installs the CLI needs no token at all. 'wait-for-release' grants itself the
+# two scopes it does use.
+permissions: {}
+
 jobs:
   wait-for-release:
     name: Wait for Release to complete
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
