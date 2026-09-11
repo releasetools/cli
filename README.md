@@ -213,13 +213,14 @@ workflow sets both:
   - run: rt github::await_workflow "$SHA" tests.yml
     env:
       GH_TOKEN: ${{ github.token }} # no runner default
-      GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY, under the name gh reads
+      GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY; gh only reads GH_REPO
       SHA: ${{ github.sha }} # = $GITHUB_SHA
 ```
 
-Two of those three rename a variable the runner already sets. `GITHUB_TOKEN` is not one of
-them: it is not a default environment variable, so the token is the only value here that
-has to be handed over rather than renamed.
+`GH_REPO` and `SHA` carry values the runner already publishes, as `GITHUB_REPOSITORY` and
+`GITHUB_SHA`. The rename matters for the first: gh looks for `GH_REPO` and never at
+`GITHUB_REPOSITORY`. `GITHUB_TOKEN` is not a default variable at all, so the token is the
+one value here that has to be handed over rather than renamed.
 
 ## Developers
 
