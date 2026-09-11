@@ -104,6 +104,58 @@ A fork still answers `origin`, because that is what its tracking branch says and
 right answer for releasing the fork. `git config checkout.defaultRemote upstream` is how you
 say otherwise.
 
+```shell
+# HEAD is a commit main already took. Refuses on a shallow clone rather than answering
+# from truncated history, where merge-base reports a genuine ancestor as not one.
+rt git::assert_on_branch main
+
+# The same question over the API, which needs no local history and so works on a shallow
+# clone or a repository too large to fetch in full.
+rt github::assert_on_branch main
+```
+
+`release::prechecks` runs the shape, the tree, the tag, the ordering and optionally the
+branch and the registry in one call:
+
+```shell
+rt release::prechecks "$(uv version --short)" \
+  --branch main \
+  --check-registry-url "https://pypi.org/pypi/my-package/1.2.3/json"
+```
+
+The registry must answer 404. PyPI, the npm registry and crates.io all do for a version
+they do not carry, and any other answer is a refusal rather than a guess.
+
+## Waiting for things
+
+```shell
+# Wait for one workflow's run on a commit, and fail if that run failed.
+rt github::await_workflow "$GITHUB_SHA" tests.yml
+
+# Wait for a URL to start serving, backing off 15s, 30s, 60s, 120s, 240s.
+# An index or a CDN takes time to serve what it has just accepted, and a short fixed
+# wait fails releases that published correctly.
+rt net::await_url "https://pypi.org/pypi/my-package/1.2.3/json"
+
+# The status code, once, for the times you want to branch on it.
+rt net::status "https://example.com/"
+# 200
+```
+
+## Release bookkeeping
+
+```shell
+# What was written for this version, for a release body.
+rt changelog::section 1.2.3
+rt changelog::section 1.2.3 docs/CHANGELOG.md
+
+# Refuse to republish over a release that already has assets.
+rt github::assert_release_absent v1.2.3
+
+# Tell another repository that a release shipped.
+rt github::dispatch releasetools/homebrew-tap upstream-released version=v1.2.3
+```
+
 ## GitHub Action
 
 The `releasetools/cli` library can be installed via a GitHub workflow:
@@ -136,8 +188,33 @@ steps:
   - run: releasetools base::check_deps
 ```
 
-> **NOTE:** there is nothing to install alongside it. Every module is bash over `git`,
-> `gh` and coreutils, so the action is a single download-and-link step.
+### What each namespace needs
+
+| namespace | needs |
+| --- | --- |
+| `base::` | nothing |
+| `git::` | `git`, `grep` |
+| `github::` | `gh`, authenticated through `GH_TOKEN` |
+| `net::` | `curl` |
+| `changelog::` | `awk`, `sed` |
+| `release::` | whatever the checks it runs need |
+
+Nothing is installed alongside the action, and GitHub-hosted runners carry all of it.
+
+`base::check_deps` reports on every namespace at once and fails if any of them is missing a
+command, so on a machine without `gh` it fails even for someone who only calls `git::`. The
+error names the namespace.
+
+`github::` commands ask the GitHub CLI, which resolves the repository from `GH_REPO` when
+set and from the checkout's remote otherwise. `GITHUB_REPOSITORY` is not part of that, so a
+workflow sets both:
+
+```yaml
+  - run: rt github::await_workflow "$GITHUB_SHA" tests.yml
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+```
 
 ## Developers
 

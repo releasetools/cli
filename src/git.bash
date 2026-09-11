@@ -456,3 +456,68 @@ function git::assert_tag_free() {
         ;;
     esac
 }
+
+# Refuses unless the given branch already took HEAD.
+#
+# Anyone who can push a tag can publish, and branch protection guards a branch rather than
+# where a tag points, so without this a release can be cut from a commit no review, no
+# merge and no protection rule ever saw.
+#
+# '--is-ancestor' rather than an equality check, so deliberately releasing an older commit
+# that is on the branch still works.
+#
+# Usage: git::assert_on_branch [branch]
+function git::assert_on_branch() {
+    local branch remote head shallow status
+
+    branch="${1:-main}"
+
+    if ! remote="$(git::remote)"; then
+        return 1
+    fi
+
+    # 'merge-base' answers from the history it has, and on a truncated one it reports a
+    # genuine ancestor as not one. That wrong answer is a refusal indistinguishable from a
+    # real refusal, so this declines to answer instead.
+    shallow="$(git rev-parse --is-shallow-repository 2>/dev/null || echo "false")"
+    if [ "$shallow" = "true" ]; then
+        echo "ERROR: this is a shallow clone, and 'merge-base' cannot answer from it." >&2
+        echo "ERROR: fetch the full history (actions/checkout with 'fetch-depth: 0')," >&2
+        echo "ERROR: or call 'github::assert_on_branch', which asks the API instead." >&2
+        return 1
+    fi
+
+    # An explicit refspec, because a clone made with '--branch <tag>' fetches no branches at
+    # all and leaves no 'refs/remotes/<remote>/<branch>' behind for merge-base to read.
+    # '+' so a branch that was force-pushed still updates.
+    if ! git fetch --quiet "$remote" "+refs/heads/$branch:refs/remotes/$remote/$branch"; then
+        echo "ERROR: could not fetch '$branch' from '$remote'" >&2
+        return 1
+    fi
+
+    if ! head="$(git rev-parse HEAD)"; then
+        echo "ERROR: could not resolve HEAD" >&2
+        return 1
+    fi
+
+    # 'merge-base --is-ancestor' exits 1 for "no" and 128 for "could not tell". Collapsing
+    # them would report a broken repository as an unmerged commit.
+    status=0
+    git merge-base --is-ancestor HEAD "refs/remotes/$remote/$branch" || status=$?
+
+    case "$status" in
+    0)
+        echo "$head is on $remote/$branch." >&2
+        ;;
+    1)
+        echo "ERROR: $head is not on $remote/$branch, refusing to continue." >&2
+        echo "ERROR:   tag(s) at HEAD: $(git tag --list 'v*' --points-at HEAD | tr '\n' ' ')" >&2
+        echo "ERROR: merge it first, then tag the commit on $branch." >&2
+        return 1
+        ;;
+    *)
+        echo "ERROR: could not tell whether $head is on $remote/$branch (git exited $status)." >&2
+        return 1
+        ;;
+    esac
+}
