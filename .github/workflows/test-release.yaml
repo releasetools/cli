@@ -10,13 +10,20 @@ jobs:
     name: Wait for Release to complete
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Built from the tag under test rather than installed through
+      # 'uses: releasetools/cli@v0'. That action downloads the release this job is waiting
+      # for, which by definition does not exist yet.
+      - name: Build the dist
+        run: make all
+
       - name: Wait for release
-        uses: lewagon/wait-on-check-action@369769072fe522a3a8a85c03c96af1e5242a1994 # v1.9.1
-        with:
-          ref: ${{ github.ref }}
-          check-name: "Release GHA"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 5
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bash dist/releasetools.bash github::await_workflow "$GITHUB_SHA" release.yaml
 
   test-default:
     name: Test simple install
