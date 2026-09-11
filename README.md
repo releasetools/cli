@@ -126,6 +126,44 @@ rt release::prechecks "$(uv version --short)" \
 The registry must answer 404. PyPI, the npm registry and crates.io all do for a version
 they do not carry, and any other answer is a refusal rather than a guess.
 
+## Versions and state
+
+```shell
+# The release tag on HEAD, 'v' removed, empty when HEAD carries none
+rt git::version_tag
+# 1.2.3
+
+# The same with the 'v' back on, or the short SHA when HEAD carries no tag
+rt git::version_or_sha
+# v1.2.3
+
+# The short SHA, with '-dirty' appended when the tree has uncommitted changes
+rt git::head_sha
+# 8a7a7b6-dirty
+
+# Whether the tree has uncommitted changes. A predicate: it prints nothing and
+# answers with its exit status.
+rt git::is_dirty && echo "commit first"
+
+# The newest release tag on the remote this repository belongs to
+rt git::latest_version
+# v1.2.3
+```
+
+## Tagging a release
+
+```shell
+rt git::release v1.2.3 --sign --push
+```
+
+`--major`/`-m` also moves the matching `v<major>` tag, `--sign`/`-s` signs it, `--push`/`-p`
+pushes it, and `--force`/`-f` moves one that is already on the remote. Unknown flags and
+non-semver versions are refused rather than ignored, so a typo such as `--pushh` cannot
+quietly mean "do not push".
+
+A tag that already points at HEAD is reused, so a retry after a failed push needs no flag.
+One pointing at any other commit is refused.
+
 ## Waiting for things
 
 ```shell
@@ -221,6 +259,16 @@ workflow sets both:
 `GITHUB_SHA`. The rename matters for the first: gh looks for `GH_REPO` and never at
 `GITHUB_REPOSITORY`. `GITHUB_TOKEN` is not a default variable at all, so the token is the
 one value here that has to be handed over rather than renamed.
+
+## Every command
+
+This page covers what a release reaches for. The full reference, with every flag and the
+reasoning behind each command, is at [release.tools/cli](https://release.tools/cli).
+
+```shell
+# Or ask the tool itself
+rt
+```
 
 ## Developers
 

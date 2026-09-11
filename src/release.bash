@@ -107,7 +107,7 @@ function release::_is_after() {
 #
 # Usage: release::prechecks <version> [--branch <name>] [--check-registry-url <url>]
 function release::prechecks() {
-    local version branch registry_url latest dirty code status
+    local version branch registry_url latest code status
 
     version=""
     branch=""
@@ -164,8 +164,7 @@ function release::prechecks() {
 
     # 2. A clean tree, because a release branch cut from the remote carries uncommitted work
     #    onto it, and a version read from the working copy may not be the one being tagged.
-    dirty="$(git::is_dirty)"
-    if [ -n "$dirty" ]; then
+    if git::is_dirty; then
         git status --porcelain >&2
         echo "ERROR: the working tree is dirty; commit or stash first." >&2
         return 1
