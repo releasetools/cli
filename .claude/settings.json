@@ -1,9 +1,9 @@
 {
   "enabledPlugins": {
-    "release-notes@ReleaseTools": true
+    "release-notes@release-tools": true
   },
   "extraKnownMarketplaces": {
-    "ReleaseTools": {
+    "release-tools": {
       "source": {
         "source": "github",
         "repo": "releasetools/agent-plugins"
