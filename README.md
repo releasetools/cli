@@ -98,7 +98,11 @@ rt git::remote
 
 `git::remote` answers from `checkout.defaultRemote`, then the current branch's remote, then
 the sole remote, and refuses when several exist and nothing says which. `git::latest_version`
-uses it, so a fork no longer resolves its releases against the fork.
+and `git::release --push` both use it instead of assuming `origin`.
+
+A fork still answers `origin`, because that is what its tracking branch says and it is the
+right answer for releasing the fork. `git config checkout.defaultRemote upstream` is how you
+say otherwise.
 
 ## GitHub Action
 

@@ -149,6 +149,7 @@ function git::release() {
     local existing
     local head
     local tag_exists
+    local remote
 
     # Keep the original arguments for the error message; the loop below consumes "$@"
     args="$*"
@@ -232,6 +233,15 @@ function git::release() {
                 return 1
             fi
 
+            # Reuse drops whatever the original tag was created without, and a
+            # signature is the one that matters: pushing an unsigned tag in answer to
+            # '--sign' is a quieter failure than refusing.
+            if [ -n "$sign_flag" ] && ! git tag --verify "$version" >/dev/null 2>&1; then
+                echo "ERROR: tag '$version' already exists here but carries no signature," >&2
+                echo "ERROR: and --sign was requested. Delete it and tag again." >&2
+                return 1
+            fi
+
             echo "Tag '$version' already points at HEAD; reusing it." >&2
             tag_exists=true
         fi
@@ -248,7 +258,11 @@ function git::release() {
 
     # If --push was specified, push the tag to the remote
     if [ "$should_push" = true ]; then
-        if ! git push origin "$version" $force_flag; then
+        if ! remote="$(git::remote)"; then
+            return 1
+        fi
+
+        if ! git push "$remote" "$version" $force_flag; then
             echo "ERROR: failed to push tag '$version'" >&2
             return 1
         fi
@@ -264,7 +278,7 @@ function git::release() {
 
         # If --push was specified, push the tag to the remote
         if [ "$should_push" = true ]; then
-            if ! git push --force origin "$major"; then
+            if ! git push --force "$remote" "$major"; then
                 echo "ERROR: failed to push tag '$major'" >&2
                 return 1
             fi
@@ -274,9 +288,12 @@ function git::release() {
 
 # Returns the name of the remote this repository belongs to.
 #
-# Asked of the repository in decreasing order of how deliberate the answer is. 'origin' is a
-# convention rather than an answer: on a fork it names the fork, while the branches and tags
-# a release cares about live on the upstream.
+# Asked of the repository in decreasing order of how deliberate the answer is.
+#
+# 'checkout.defaultRemote' is the only one of these that a fork can be told with. A fork's
+# 'origin' names the fork and so does its tracking branch, so both of the steps below still
+# answer 'origin' there, correctly for a release of the fork and wrongly for a release of
+# what it was forked from. Set that config to say which.
 #
 # 'remote.pushDefault' is deliberately not consulted. It names where commits go, not where
 # they come from, and the two differ in exactly the case that makes this question worth

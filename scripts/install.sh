@@ -109,9 +109,37 @@ echo "" >&2
 BINARY_DIR="$(base::_symlink_binary_location)"
 readonly BINARY_DIR
 
+# Link a name into BINARY_DIR, unless something else already owns it.
+#
+# 'rt' is short and already taken elsewhere: RBTools and Request Tracker both ship one, and
+# BINARY_DIR defaults to ~/.local/bin, which every installer writes into. An unconditional
+# 'ln -sf' would replace whichever was there and say nothing.
+#
+# A link this project made points at a file called releasetools.bash, under a directory
+# named for the version, so an upgrade replaces its own link and leaves anything else.
+link_binary() {
+  link_name="$1"
+  target="$BINARY_DIR/$link_name"
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    existing="$(readlink "$target" 2>/dev/null || echo "")"
+    case "$existing" in
+    */"$NAME") ;;
+    *)
+      echo "NOTICE: $target already exists and was not installed by releasetools; leaving it." >&2
+      echo "NOTICE: remove it and re-run the installer to use the '$link_name' name." >&2
+      return 0
+      ;;
+    esac
+  fi
+
+  ln -sf "$INSTALL_DIR/$NAME" "$target" >&2
+  echo "Linked $target" >&2
+}
+
 echo "Linking $EXEC_NAME and $SHORT_NAME into $BINARY_DIR..." >&2
-ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$EXEC_NAME" >&2
-ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$SHORT_NAME" >&2
+link_binary "$EXEC_NAME"
+link_binary "$SHORT_NAME"
 
 # Output the location of the installed script
 # allowing calling scripts to find it
