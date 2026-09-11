@@ -61,11 +61,13 @@ function git::head_sha() {
     fi
 }
 
-# Returns a version tag (e.g. 'v#') pointing at the current branch's HEAD.
+# Returns the highest release tag pointing at the current branch's HEAD, 'v' included.
 #
-# This function will strip the 'v' prefix from the tag (e.g. 'v1.0.0' is returned as '1.0.0').
-# If multiple tags point at HEAD, the highest version is returned; the comparison is
-# by version, not lexical, so 'v0.0.10' correctly outranks 'v0.0.9'.
+# The name says the prefix: a '*_tag' is what 'git tag' accepts, so 'v1.0.0' comes back as
+# 'v1.0.0'. Callers wanting the bare version strip it, which is the direction that cannot
+# produce a string git refuses.
+#
+# The comparison is by version, not lexical, so 'v0.0.10' outranks 'v0.0.9'.
 # Returns an empty string if no version tag points at HEAD.
 function git::version_tag() {
     local tags
@@ -87,7 +89,7 @@ function git::version_tag() {
     # closing the pipe early cannot surface as a SIGPIPE failure under 'set -o pipefail'.
     tag="${tags%%$'\n'*}"
 
-    echo "${tag#v}"
+    echo "$tag"
 }
 
 # Returns the latest tag, if associated with the current's branch HEAD,
@@ -98,17 +100,11 @@ function git::version_or_sha() {
         return 1
     fi
 
-    if [ -n "$version" ]; then
-        # Restore the 'v' prefix that git::version_tag strips. Prefixing before this test
-        # (as the previous version did) made the string never empty, so the SHA fallback
-        # below was unreachable and an untagged HEAD resolved to the literal 'v'.
-        #
-        # No dirty marker here, deliberately: this value is baked into install.sh's download
-        # URL, so a 'v1.2.3-dirty' would 404 for every consumer. The tag is the release
-        # identity; use git::head_sha when you need to know the tree was modified.
-        version="v$version"
-    else
-        # If no version tag was found, use the SHA
+    if [ -z "$version" ]; then
+        # No dirty marker on the tag branch, deliberately: this value is baked into
+        # install.sh's download URL, so a 'v1.2.3-dirty' would 404 for every consumer. The
+        # tag is the release identity; use git::head_sha when you need to know the tree was
+        # modified.
         version="$(git::head_sha)"
     fi
 
@@ -121,7 +117,11 @@ function git::version_or_sha() {
     echo "$version"
 }
 
-# Returns the most recent known version tag from the remote this repository belongs to.
+# Returns the most recent known release version on the remote this repository belongs to,
+# without the 'v'.
+#
+# The name says the prefix: a '*_version' is what a manifest, a chart and a package index
+# carry. Callers wanting the tag write "v$(rt git::latest_version)".
 function git::latest_version() {
     local remote
 
@@ -131,7 +131,7 @@ function git::latest_version() {
         return 1
     fi
 
-    git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$remote" 'v*.*.*' | tail -1 | cut -d'/' -f3
+    git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags "$remote" 'v*.*.*' | tail -1 | cut -d'/' -f3 | sed 's/^v//'
 }
 
 # Creates a release tag for the current HEAD commit.
