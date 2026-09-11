@@ -1,12 +1,13 @@
 name: Tests
 
-# Every pull request and every push to main. The other two workflows here trigger on
-# 'v0.*' tags, so until now nothing ran shellcheck over a change before it merged: a
-# pull request reached the merge button with no check having read a line of bash.
+# Every pull request, whatever it targets, and every push to main. The other two workflows
+# here trigger on 'v0.*' tags, so until this existed nothing ran shellcheck over a change
+# before it merged: a pull request reached the merge button with no check having read a
+# line of bash.
 on:
+  # No branch filter on pull requests. One stacked on another has a base that is not main,
+  # and a filter here silently skips it: #42 reached review with no check having run.
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
