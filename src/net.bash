@@ -68,11 +68,23 @@ function net::await_url() {
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
         --attempts)
-            attempts="${2-}"
+            # Checked before shifting: 'shift 2' with one argument left returns non-zero,
+            # and under 'set -e' that aborts before the validation below can say why.
+            if [ "$#" -lt 2 ]; then
+                echo "ERROR: --attempts needs a value" >&2
+                return 1
+            fi
+            attempts="$2"
             shift 2
             ;;
         --base)
-            base="${2-}"
+            # Checked before shifting: 'shift 2' with one argument left returns non-zero,
+            # and under 'set -e' that aborts before the validation below can say why.
+            if [ "$#" -lt 2 ]; then
+                echo "ERROR: --base needs a value" >&2
+                return 1
+            fi
+            base="$2"
             shift 2
             ;;
         -*)

@@ -82,7 +82,13 @@ function github::await_workflow() {
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
         --timeout)
-            timeout="${2-}"
+            # Checked before shifting: 'shift 2' with one argument left returns non-zero,
+            # and under 'set -e' that aborts before the validation below can say why.
+            if [ "$#" -lt 2 ]; then
+                echo "ERROR: --timeout needs a value" >&2
+                return 1
+            fi
+            timeout="$2"
             shift 2
             ;;
         -*)
@@ -116,7 +122,7 @@ function github::await_workflow() {
     deadline=$(($(date +%s) + timeout))
     while true; do
         if ! state="$(gh run list --commit "$sha" --workflow "$workflow" \
-            --json status,conclusion --jq '.[0] | "\(.status) \(.conclusion // "-")"')"; then
+            --json status,conclusion --jq '.[0] // empty | "\(.status) \(.conclusion // "-")"')"; then
             echo "ERROR: could not list runs of '$workflow' for $sha." >&2
             echo "ERROR: set GH_REPO when running outside a checkout, and GH_TOKEN to authenticate." >&2
             return 1
@@ -134,6 +140,9 @@ function github::await_workflow() {
         "")
             # No run at all yet. A commit that reached the branch has one; a tag pushed
             # seconds after a merge can arrive before it.
+            #
+            # '// empty' in the query above is what makes this reachable: without it jq
+            # renders the empty list as the literal "null -" and this case never matched.
             echo "waiting for $workflow to start on $sha..." >&2
             ;;
         *)

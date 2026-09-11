@@ -19,14 +19,38 @@ function release::_internal_check_deps() {
 # when either is not a version.
 #
 # Compared component by component as integers rather than as strings, so 0.10.0 is after
-# 0.9.0. A non-numeric component is refused rather than read as 0, which would make
-# '1.0.0-rc1' tie with '1.0.0' and pass a forward-only check.
+# 0.9.0. A non-numeric component is refused rather than read as 0.
+#
+# A prerelease sorts before the release it leads to, as semver says and as
+# 'versionsort.suffix=-' already makes git's own tag sort do. Without that, a project that
+# cuts release candidates could never run these checks for the version following one:
+# 'v2.0.0-rc1' is then the newest tag the remote carries, and 2.0.0 could not be compared
+# against it at all. Two prereleases of the same version are compared as strings, which is
+# right for 'rc1' against 'rc2' and an approximation past that.
 function release::_is_after() {
-    local a b i
+    local a b i want_core want_pre have_core have_pre
     local -a want have
 
-    IFS='.' read -r -a want <<<"${1#v}"
-    IFS='.' read -r -a have <<<"${2#v}"
+    want_core="${1#v}"
+    want_pre=""
+    case "$want_core" in
+    *-*)
+        want_pre="${want_core#*-}"
+        want_core="${want_core%%-*}"
+        ;;
+    esac
+
+    have_core="${2#v}"
+    have_pre=""
+    case "$have_core" in
+    *-*)
+        have_pre="${have_core#*-}"
+        have_core="${have_core%%-*}"
+        ;;
+    esac
+
+    IFS='.' read -r -a want <<<"$want_core"
+    IFS='.' read -r -a have <<<"$have_core"
 
     for i in 0 1 2; do
         a="${want[$i]:-0}"
@@ -45,6 +69,16 @@ function release::_is_after() {
             return 1
         fi
     done
+
+    # Same core version. A release is after its own prereleases, a prerelease is not after
+    # the release it leads to, and nothing is after itself.
+    if [ -z "$want_pre" ] && [ -n "$have_pre" ]; then
+        return 0
+    fi
+
+    if [ -n "$want_pre" ] && [ -n "$have_pre" ] && [[ "$want_pre" > "$have_pre" ]]; then
+        return 0
+    fi
 
     return 1
 }
@@ -81,11 +115,23 @@ function release::prechecks() {
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
         --branch)
-            branch="${2-}"
+            # Checked before shifting: 'shift 2' with one argument left returns non-zero,
+            # and under 'set -e' that aborts before the validation below can say why.
+            if [ "$#" -lt 2 ]; then
+                echo "ERROR: --branch needs a value" >&2
+                return 1
+            fi
+            branch="$2"
             shift 2
             ;;
         --check-registry-url)
-            registry_url="${2-}"
+            # Checked before shifting: 'shift 2' with one argument left returns non-zero,
+            # and under 'set -e' that aborts before the validation below can say why.
+            if [ "$#" -lt 2 ]; then
+                echo "ERROR: --check-registry-url needs a value" >&2
+                return 1
+            fi
+            registry_url="$2"
             shift 2
             ;;
         -*)
@@ -130,10 +176,15 @@ function release::prechecks() {
         return 1
     fi
 
-    # 4. Forward only. A repository that has never released carries no tags, and git::
-    #    latest_version fails rather than printing nothing, so that case is read as 0.0.0.
-    latest="$(git::latest_version 2>/dev/null || true)"
-    if [ -z "$latest" ]; then
+    # 4. Forward only, against the newest release tag the remote carries. A repository that
+    #    has never released has none, which is read as 0.0.0.
+    status=0
+    latest="$(git::latest_version 2>/dev/null)" || status=$?
+    if [ "$status" -ne 0 ] || [ -z "$latest" ]; then
+        # git::latest_version fails both when the remote carries no release tag and when it
+        # could not be asked, without saying which. Step 3 asked that same remote a moment
+        # ago and got an answer, so only the first is left by the time this runs. Reordering
+        # these checks would make that untrue.
         latest="0.0.0"
     fi
 
