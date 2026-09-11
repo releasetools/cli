@@ -8,8 +8,11 @@
 # 'GH_TOKEN':
 #
 #   env:
-#     GH_TOKEN: ${{ github.token }}
-#     GH_REPO: ${{ github.repository }}
+#     GH_TOKEN: ${{ github.token }}      # no runner default
+#     GH_REPO: ${{ github.repository }}  # = $GITHUB_REPOSITORY, renamed for gh
+#
+# The second of those renames a variable the runner already sets. The first does not:
+# GITHUB_TOKEN is not a default environment variable, so the token has to be handed over.
 #
 # Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #

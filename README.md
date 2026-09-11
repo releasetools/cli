@@ -210,11 +210,16 @@ set and from the checkout's remote otherwise. `GITHUB_REPOSITORY` is not part of
 workflow sets both:
 
 ```yaml
-  - run: rt github::await_workflow "$GITHUB_SHA" tests.yml
+  - run: rt github::await_workflow "$SHA" tests.yml
     env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }} # no runner default
+      GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY, under the name gh reads
+      SHA: ${{ github.sha }} # = $GITHUB_SHA
 ```
+
+Two of those three rename a variable the runner already sets. `GITHUB_TOKEN` is not one of
+them: it is not a default environment variable, so the token is the only value here that
+has to be handed over rather than renamed.
 
 ## Developers
 
