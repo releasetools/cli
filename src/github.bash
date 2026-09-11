@@ -8,8 +8,12 @@
 # 'GH_TOKEN':
 #
 #   env:
-#     GH_TOKEN: ${{ github.token }}
-#     GH_REPO: ${{ github.repository }}
+#     GH_TOKEN: ${{ github.token }}      # no runner default
+#     GH_REPO: ${{ github.repository }}  # = $GITHUB_REPOSITORY; gh reads GH_REPO
+#
+# GH_REPO carries the value the runner publishes as GITHUB_REPOSITORY, which gh does not
+# look at. GITHUB_TOKEN is not a default variable at all, so the token has to be handed
+# over rather than renamed.
 #
 # Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
 #

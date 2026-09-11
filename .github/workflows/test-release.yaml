@@ -29,9 +29,13 @@ jobs:
 
       - name: Wait for release
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: bash dist/releasetools.bash github::await_workflow "$GITHUB_SHA" release.yaml
+          # GH_REPO and SHA carry values the runner already publishes, as GITHUB_REPOSITORY
+          # and GITHUB_SHA. The rename matters for the first: gh looks for GH_REPO and never
+          # at GITHUB_REPOSITORY. GITHUB_TOKEN is not a default variable at all.
+          GH_TOKEN: ${{ github.token }} # no runner default
+          GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY; gh reads GH_REPO
+          SHA: ${{ github.sha }} # = $GITHUB_SHA
+        run: bash dist/releasetools.bash github::await_workflow "$SHA" release.yaml
 
   test-default:
     name: Test simple install
