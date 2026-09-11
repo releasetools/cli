@@ -127,3 +127,8 @@ zsdoc/data
 
 # Build artifacts
 dist/
+
+# Claude Code keeps per-agent git worktrees here. The directory above it is tracked, for
+# .claude/settings.json, so without this every worktree shows as untracked and anything
+# asking for a clean tree refuses: release::prechecks caught it during the 0.1.0 release.
+.claude/worktrees/
