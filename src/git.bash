@@ -21,15 +21,23 @@ function git::_internal_check_deps() {
     fi
 }
 
-# Checks if the current Git working directory contains uncommitted changes.
+# Returns 0 when the working directory has uncommitted changes, 1 when it is clean.
 #
-# Prints nothing if the working directory is clean, '-dirty' otherwise.
+# A predicate, so 'if git::is_dirty; then' does what it reads as. It used to print '-dirty'
+# or nothing and exit 0 either way, which made that same 'if' run its body on a clean tree,
+# silently and plausibly. Callers that want the suffix build it from the answer.
+#
+# An unreadable working tree is reported as dirty. That is the direction that stops a
+# release rather than letting one through, and the reason goes to stderr.
 function git::is_dirty() {
-    if [ -n "$(git status --porcelain)" ]; then
-        echo "-dirty"
-    else
-        echo ""
+    local changes
+
+    if ! changes="$(git status --porcelain)"; then
+        echo "ERROR: could not read the working tree; treating it as dirty." >&2
+        return 0
     fi
+
+    [ -n "$changes" ]
 }
 
 # Get the current branch HEAD's SHA.
@@ -46,7 +54,11 @@ function git::head_sha() {
         return 1
     fi
 
-    echo "${git_sha}$(git::is_dirty)"
+    if git::is_dirty; then
+        echo "${git_sha}-dirty"
+    else
+        echo "$git_sha"
+    fi
 }
 
 # Returns a version tag (e.g. 'v#') pointing at the current branch's HEAD.
