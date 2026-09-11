@@ -213,7 +213,7 @@ workflow sets both:
   - run: rt github::await_workflow "$SHA" tests.yml
     env:
       GH_TOKEN: ${{ github.token }} # no runner default
-      GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY; gh only reads GH_REPO
+      GH_REPO: ${{ github.repository }} # = $GITHUB_REPOSITORY; gh reads GH_REPO
       SHA: ${{ github.sha }} # = $GITHUB_SHA
 ```
 
