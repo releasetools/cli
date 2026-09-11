@@ -12,7 +12,7 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:draft <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
-## [Unreleased]
+## 0.1.0 - 2026-09-11
 
 ### Added
 
