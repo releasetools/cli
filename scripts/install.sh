@@ -29,6 +29,11 @@ readonly NAME
 # The name of the symlinked executable that will be run by users
 EXEC_NAME="releasetools"
 readonly EXEC_NAME
+# Linked alongside it, because the Homebrew formula creates the same pair. Without this,
+# 'rt' existed only for brew users and a workflow using 'uses: releasetools/cli@v0' could
+# not run a command the documentation spells 'rt'.
+SHORT_NAME="rt"
+readonly SHORT_NAME
 
 # Define URLs for the script and its checksum file
 SCRIPT_URL="$REPO/download/$VERSION/$NAME"
@@ -104,8 +109,9 @@ echo "" >&2
 BINARY_DIR="$(base::_symlink_binary_location)"
 readonly BINARY_DIR
 
-echo "Linking binary to $BINARY_DIR/$EXEC_NAME..." >&2
+echo "Linking $EXEC_NAME and $SHORT_NAME into $BINARY_DIR..." >&2
 ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$EXEC_NAME" >&2
+ln -sf "$INSTALL_DIR/$NAME" "$BINARY_DIR/$SHORT_NAME" >&2
 
 # Output the location of the installed script
 # allowing calling scripts to find it

@@ -26,7 +26,7 @@ brew tap releasetools/tap
 brew install releasetools-cli
 ```
 
-The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/` and a binary will be symlinked at `~/.local/bin/releasetools`.
+The tools will by default be installed to `~/.local/share/releasetools/cli/VERSION/`, and two symlinks are created in `~/.local/bin`: `releasetools` and the shorter `rt`. Both run the same script, and `brew` installs the same pair.
 
 2\. Utilize the _releasetools_ library
 
@@ -36,6 +36,10 @@ export PATH=~/.local/bin:"$PATH"
 
 # You can run commands, e.g.:
 releasetools version
+# vX.Y.Z
+
+# 'rt' is the same script under a shorter name
+rt version
 # vX.Y.Z
 
 # Optionally, check that all dependencies for all modules are correctly installed
@@ -64,6 +68,37 @@ export RELEASETOOLS_INSTALL_DIR="$HOME/.local/share"
 export RELEASETOOLS_BINARY_DIR="$HOME/.local/bin"
 # proceed with the installation steps outlined above
 ```
+
+## Release checks
+
+Four assertions that a release pipeline runs before it publishes anything. Each one prints
+its reasoning on stderr and returns non-zero when it cannot prove what it is asked to
+prove, so a doubtful answer stops a release rather than passing it.
+
+```shell
+# The tag on HEAD names the version you think you are releasing.
+# The version is passed in, so this reads no project manifest and needs no TOML, JSON or
+# YAML parser of its own.
+rt git::assert_tag_version "$(uv version --short)"
+
+# The remote does not already carry the tag. Asked of the remote, because a local clone
+# may have no tags at all. A failure to ask is a refusal, never a "yes".
+rt git::assert_tag_free "v1.2.3"
+```
+
+```shell
+# The release tags pointing at HEAD, highest first, or nothing when there are none.
+rt git::tags_at_head
+# v1.2.3
+
+# The remote this repository belongs to.
+rt git::remote
+# origin
+```
+
+`git::remote` answers from `checkout.defaultRemote`, then the current branch's remote, then
+the sole remote, and refuses when several exist and nothing says which. `git::latest_version`
+uses it, so a fork no longer resolves its releases against the fork.
 
 ## GitHub Action
 
