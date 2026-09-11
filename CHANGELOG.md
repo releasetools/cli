@@ -12,6 +12,32 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:draft <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
+## 0.3.0 - 2026-09-11
+
+### Changed
+
+- `git::version_tag` prints the tag with its `v`, and `git::latest_version` prints the
+  version without one. A `*_tag` is what `git tag` accepts; a `*_version` is what a
+  manifest, a chart and a package index carry, so the name now says which you get.
+
+  **This breaks any caller reading either value.**
+
+  | | before | after |
+  | --- | --- | --- |
+  | `rt git::version_tag` | `1.2.3` | `v1.2.3` |
+  | `rt git::latest_version` | `v1.2.3` | `1.2.3` |
+
+  `git::version_or_sha` and `git::tags_at_head` are unchanged, and every command that takes
+  a version or a tag still accepts either form. Only what comes out moved.
+
+### Choices
+
+Both commands could have kept their output and gained new names instead. The output moved
+because the names are the public surface: somebody reaching for `version_tag` should get a
+tag, and the next reader should not have to check which. A code search across every org and
+then globally found one caller outside this repository, and its `${VERSION#v}` becomes a
+no-op rather than wrong.
+
 ## 0.2.0 - 2026-09-11
 
 ### Changed
