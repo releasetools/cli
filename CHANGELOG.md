@@ -9,7 +9,7 @@ result, no different output and no different exit code, it is not in here, whate
 to build.
 
 `release.yaml` reads the section for the version being released and uses it as the GitHub
-release body, and refuses a tag whose version has no section. `/release-notes:draft <version>`
+release body, and refuses a tag whose version has no section. `/release-notes:prepare <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
 ## 0.3.0 - 2026-09-11
