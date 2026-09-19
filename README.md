@@ -184,6 +184,22 @@ rt net::status "https://example.com/"
 # 200
 ```
 
+## Setting the version
+
+```shell
+# Run the command this project declares for setting its version, then prove
+# it took. The command comes from the 'bump' key of .releasetools.yaml.
+rt version::bump 1.2.3 --command 'uv version {version}' --manifest pyproject.toml
+rt version::bump 1.2.3 --command 'npm version {version} --no-git-tag-version' \
+    --manifest package.json --dir packages/api
+```
+
+Nothing here parses or rewrites a manifest. Every ecosystem ships the command that
+sets a version, so the project says which one it is and this runs it, substituting
+`{version}`. A manifest that already declares the version is left alone, so a second
+run changes nothing, and a command that ran without the manifest taking it fails
+here rather than at the release.
+
 ## Release bookkeeping
 
 ```shell
@@ -240,6 +256,7 @@ steps:
 | `net::` | `curl` |
 | `changelog::` | `awk`, `sed` |
 | `release::` | whatever the checks it runs need |
+| `version::` | whatever the command a project declares needs |
 
 Nothing is installed alongside the action, and GitHub-hosted runners carry all of it.
 
