@@ -17,7 +17,7 @@ runs inside `tag.sh` and refuses to tag until the two agree.
 2\. Write the changelog entry.
 
 ```shell
-/release-notes:draft X.Y.Z
+/release-notes:prepare X.Y.Z
 ```
 
 That rules on every commit since the previous tag and writes the entry into
