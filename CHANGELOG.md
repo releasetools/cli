@@ -12,6 +12,18 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:prepare <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
+## 0.4.0 - 2026-09-20
+
+### Added
+
+- `version::bump <version> --command '<template>' [--manifest <file>] [--dir <path>]` runs
+  the command a project declares for setting its version, substituting `{version}`, and
+  then refuses if the manifest did not take it. Every ecosystem ships that command --
+  `uv version`, `npm version --no-git-tag-version`, `cargo set-version` -- so nothing here
+  parses or rewrites a manifest, and the project says which command it is in the `bump`
+  key of `.releasetools.yaml`. A manifest already declaring the version is left alone, so
+  running it twice changes nothing and a resumed release does not double-bump.
+
 ## 0.3.0 - 2026-09-11
 
 ### Changed
