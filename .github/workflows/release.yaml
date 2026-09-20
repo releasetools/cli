@@ -48,17 +48,31 @@ jobs:
             README.md
 
       # The tap bumps its formula from this release. It also polls daily, so this only
-      # shortens the delay -- which is why a missing token is a notice, not a failure.
-      # GITHUB_TOKEN cannot dispatch to another repository; HOMEBREW_TAP_TOKEN needs
-      # 'contents: write' on releasetools/homebrew-tap.
+      # shortens the delay.
+      # GITHUB_TOKEN is scoped to this repository, so it cannot dispatch to the
+      # tap. The org's automation App can, and its installation token lasts an
+      # hour rather than until somebody rotates a PAT. A missing App is a
+      # notice rather than a failure: the tap polls daily, and a release is
+      # not worth blocking over an org variable.
+      - name: Generate a token for the tap
+        id: app-token
+        if: startsWith(github.ref, 'refs/tags/') && vars.GH_APP_CLIENT_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: homebrew-tap
+
       - name: Notify the Homebrew tap
         if: startsWith(github.ref, 'refs/tags/')
         env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           VERSION: ${{ github.ref_name }}
         run: |
           if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::notice::HOMEBREW_TAP_TOKEN is not set; the tap will pick up $VERSION on its next scheduled run."
+            echo "::notice::no app token for releasetools/homebrew-tap; the tap will pick up $VERSION on its next scheduled run."
             exit 0
           fi
 
