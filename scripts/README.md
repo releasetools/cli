@@ -9,7 +9,7 @@ rather than shipping a wrong one.
 
 1\. Bump the `default:` version in [action.yml](../action.yml) and commit it.
 
-`git::release --major` force-moves the `v0` tag onto every release, so a consumer writing
+`release.yaml` moves the `v0` tag onto every release, so a consumer writing
 `uses: releasetools/cli@v0` installs whatever that default names. Left stale, `@v0` keeps
 serving the previous release while every test passes. `scripts/assert-action-version.sh`
 runs inside `tag.sh` and refuses to tag until the two agree.
@@ -32,12 +32,13 @@ version has no section, so this is not optional.
 3\. Tag and push.
 
 ```shell
-scripts/tag.sh vX.Y.Z --major --sign --push # X, Y, Z are integers
+scripts/tag.sh vX.Y.Z --sign --push # X, Y, Z are integers
 ```
 
-`--major` is what moves `v0` onto the new release, and `uses: releasetools/cli@v0` resolves
-through that tag, so without it every consumer keeps the previous release no matter what
-step 1 said. `--sign` because every release tag here carries a signature.
+`--sign` because every release tag here carries a signature. Leave `--major` off: once the
+release exists, `release.yaml` commits the tagged tree to `release/v0` through GitHub's
+signed commit API and force-moves `v0` onto that commit, which `uses: releasetools/cli@v0`
+resolves through.
 
 4\. Watch `release.yaml`, then `test-release.yaml`.
 

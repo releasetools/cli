@@ -47,6 +47,66 @@ jobs:
             dist/install.sh
             README.md
 
+      # 'uses: releasetools/cli@v<major>' resolves through the major tag, so it moves
+      # here, after the release it installs exists. The tag points at a commit on
+      # release/<major> that carries the tagged tree unchanged: signed-push commits it
+      # through createCommitOnBranch, which GitHub signs, so the major tag lands on a
+      # verified commit without a GPG key on the runner. The commit's parent is the
+      # previous release, and its Source-Commit trailer names the tagged commit.
+      - name: Export the tagged tree
+        id: major
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          tree="$RUNNER_TEMP/major-tree"
+          mkdir -p "$tree"
+          git archive --format=tar "$GITHUB_SHA" | tar -x -C "$tree"
+
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          echo "major=${GITHUB_REF_NAME%%.*}" >> "$GITHUB_OUTPUT"
+
+      # signed-push commits onto an existing branch. A missing one is seeded from the
+      # previous release the major tag names, so the first commit on it carries the
+      # change between the two releases; a major with no tag yet starts at the tagged
+      # commit.
+      - name: Ensure the release branch exists
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAJOR: ${{ steps.major.outputs.major }}
+        run: |
+          set -euo pipefail
+
+          branch="release/${MAJOR}"
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/${branch}" >/dev/null 2>&1; then
+            echo "${branch} already exists"
+            exit 0
+          fi
+
+          if ! base="$(gh api "repos/${GITHUB_REPOSITORY}/commits/refs/tags/${MAJOR}" --jq .sha 2>/dev/null)"; then
+            base="$GITHUB_SHA"
+          fi
+
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/heads/${branch}" -f sha="${base}" >/dev/null
+          echo "Created ${branch} at ${base}"
+
+      - name: Move the major tag
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: releasetools/actions/signed-push@3d4c910d9e482f13dc134b80647541d4bd206c44 # v0.9.0
+        with:
+          source-dir: ${{ steps.major.outputs.tree }}
+          target-repo: ${{ github.repository }}
+          target-branch: release/${{ steps.major.outputs.major }}
+          headline: "release: ${{ github.ref_name }}"
+          body: |
+            Source-Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}>
+          prune: "true"
+          tags: ${{ steps.major.outputs.major }}
+          force-tags: "true"
+          token: ${{ github.token }}
+
       # The tap bumps its formula from this release. It also polls daily, so this only
       # shortens the delay.
       # GITHUB_TOKEN is scoped to this repository, so it cannot dispatch to the
