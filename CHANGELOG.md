@@ -12,6 +12,10 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:prepare <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
+## 0.4.1 - 2026-11-02
+
+- No changes to the commands or the GitHub Action since 0.4.0.
+
 ## 0.4.0 - 2026-09-20
 
 ### Added
