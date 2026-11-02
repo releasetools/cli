@@ -3,8 +3,8 @@
 # assert-action-version.sh - checks that action.yml's default version matches a release tag
 #
 # 'action.yml' pins the version that a consumer writing 'uses: releasetools/cli@v0'
-# installs, because that input has no other source. 'git::release --major' force-moves
-# the v0 tag onto every release, so if the default is not bumped in the commit being
+# installs, because that input has no other source. release.yaml force-moves the v0
+# tag onto every release, so if the default is not bumped in the commit being
 # tagged, @v0 keeps serving the previous release -- and the test-default job in
 # test-release.yaml passes while exercising the old distributable.
 #
