@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   wait-for-release:
     name: Wait for Release to complete
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       actions: read
@@ -38,8 +38,12 @@ jobs:
         run: bash dist/releasetools.bash github::await_workflow "$SHA" release.yaml
 
   test-default:
-    name: Test simple install
-    runs-on: ubuntu-latest
+    name: Test simple install (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
       - uses: releasetools/cli@v0
@@ -50,8 +54,12 @@ jobs:
           releasetools base::check_deps
 
   test-explicit-version:
-    name: Test install current tag
-    runs-on: ubuntu-latest
+    name: Test install current tag (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
       - name: Extract release version
@@ -76,8 +84,12 @@ jobs:
           releasetools base::check_deps
 
   test-customizations:
-    name: Test customizations
-    runs-on: ubuntu-latest
+    name: Test customizations (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
       - uses: releasetools/cli@v0
@@ -92,8 +104,12 @@ jobs:
           ${{ runner.temp }}/bin/releasetools base::check_deps
 
   test-manual-install:
-    name: Test manual install
-    runs-on: ubuntu-latest
+    name: Test manual install (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
     needs: wait-for-release
     steps:
       - name: Extract release version
@@ -123,16 +139,13 @@ jobs:
           ${{ runner.temp }}/bin/releasetools base::check_deps
 
   test-platforms:
-    name: Test on multiple platforms
+    name: Test on multiple platforms (${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
         os:
-          - ubuntu-22.04
           - ubuntu-24.04
-          # macos-13 was retired by GitHub; the label no longer resolves to a runner.
-          # macos-26 replaces it, matching the images the homebrew tap tests against.
-          - macos-14
-          - macos-15
+          - ubuntu-26.04
           - macos-26
     runs-on: ${{ matrix.os }}
     needs: wait-for-release
