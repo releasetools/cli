@@ -129,10 +129,6 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-24.04
-          # macos-13 was retired by GitHub; the label no longer resolves to a runner.
-          # macos-26 replaces it, matching the images the homebrew tap tests against.
-          - macos-14
-          - macos-15
           - macos-26
     runs-on: ${{ matrix.os }}
     needs: wait-for-release
