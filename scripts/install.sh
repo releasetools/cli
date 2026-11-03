@@ -1,0 +1,146 @@
+#!/usr/bin/env sh
+#
+# install.sh - downloads and installs the specified releasetools/cli version
+#              in a local environment
+#
+# Copyright (c) 2025 Mihai Bojin, https://MihaiBojin.com/
+#
+# Licensed under the Apache License, Version 2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+
+set -eu
+
+# shellcheck disable=SC3040
+(set -o pipefail 2>/dev/null) && set -o pipefail
+
+VERSION="{{version}}"
+echo "Installing releasetools/cli version $VERSION..." >&2
+
+# The source repository URL
+REPO="https://github.com/releasetools/cli/releases"
+readonly REPO
+# The name of the project
+PROJECT_PATH="releasetools/cli"
+readonly PROJECT_PATH
+# The name of the distributed script
+NAME="releasetools.bash"
+readonly NAME
+# The name of the symlinked executable that will be run by users
+EXEC_NAME="releasetools"
+readonly EXEC_NAME
+# Linked alongside it, because the Homebrew formula creates the same pair. Without this,
+# 'rt' existed only for brew users and a workflow using 'uses: releasetools/cli@v0' could
+# not run a command the documentation spells 'rt'.
+SHORT_NAME="rt"
+readonly SHORT_NAME
+
+# Define URLs for the script and its checksum file
+SCRIPT_URL="$REPO/download/$VERSION/$NAME"
+readonly SCRIPT_URL
+
+# Allow customizing the install location
+# Set a default value, if the variable is not set
+INSTALL_DIR="${RELEASETOOLS_INSTALL_DIR-$HOME/.local/share/$PROJECT_PATH/$VERSION}"
+
+# Ensure the directory exists
+mkdir -p "$INSTALL_DIR" >&2
+
+# Ensure the variable is resolved to the absolute path
+INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd -P)"
+readonly INSTALL_DIR
+
+# If the script doesn't exist, download it
+if [ -r "$INSTALL_DIR/$NAME" ]; then
+  echo "$INSTALL_DIR/$NAME already exists. Cannot continue." >&2
+  ls -al "$INSTALL_DIR"
+  exit 1
+fi
+
+# Download the script
+echo "Downloading the script and sha256 checksum from $SCRIPT_URL..." >&2
+if command -v curl >/dev/null 2>&1; then
+  curl -sSL -o "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+  curl -sSL -o "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
+elif command -v wget >/dev/null 2>&1; then
+  wget -q -O "$INSTALL_DIR/$NAME" "$SCRIPT_URL" >&2
+  wget -q -O "$INSTALL_DIR/$NAME.sha256" "$SCRIPT_URL.sha256" >&2
+else
+  echo "ERROR: curl or wget are needed to install the script." >&2
+  exit 1
+fi
+
+# Check if the script was downloaded successfully
+if [ ! -f "$INSTALL_DIR/$NAME" ]; then
+  echo "ERROR: Failed to download the script." >&2
+  exit 1
+fi
+
+# Check if the checksum file was downloaded successfully
+if [ ! -f "$INSTALL_DIR/$NAME.sha256" ]; then
+  echo "ERROR: Failed to download the checksum file." >&2
+  exit 1
+fi
+
+# Perform checksum verification
+cwd="$(pwd -P)"
+cd "$INSTALL_DIR" >&2
+# The 'exit 1' has to run in this shell, not a subshell, to actually abort the install.
+# Only stdout is discarded: shasum's own diagnostic on stderr is the reason a verification
+# failed, and it is the only clue available inside a GitHub Actions step.
+if ! shasum -a 256 -c "$NAME.sha256" >/dev/null; then
+  echo "Checksum verification failed!" >&2
+  exit 1
+fi
+cd "$cwd" >&2 # return to the previous directory
+
+# Make the script executable
+chmod +x "$INSTALL_DIR/$NAME" >&2
+
+echo "$PROJECT_PATH/$VERSION has been downloaded and verified successfully." >&2
+echo "It was installed at: $INSTALL_DIR/$NAME" >&2
+echo "" >&2
+
+# Source releasetools/cli
+# shellcheck source=/dev/null
+. "$INSTALL_DIR/$NAME"
+
+# Symlink the binary
+BINARY_DIR="$(base::_symlink_binary_location)"
+readonly BINARY_DIR
+
+# Link a name into BINARY_DIR, unless something else already owns it.
+#
+# 'rt' is short and already taken elsewhere: RBTools and Request Tracker both ship one, and
+# BINARY_DIR defaults to ~/.local/bin, which every installer writes into. An unconditional
+# 'ln -sf' would replace whichever was there and say nothing.
+#
+# A link this project made points at a file called releasetools.bash, under a directory
+# named for the version, so an upgrade replaces its own link and leaves anything else.
+link_binary() {
+  link_name="$1"
+  target="$BINARY_DIR/$link_name"
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    existing="$(readlink "$target" 2>/dev/null || echo "")"
+    case "$existing" in
+    */"$NAME") ;;
+    *)
+      echo "NOTICE: $target already exists and was not installed by releasetools; leaving it." >&2
+      echo "NOTICE: remove it and re-run the installer to use the '$link_name' name." >&2
+      return 0
+      ;;
+    esac
+  fi
+
+  ln -sf "$INSTALL_DIR/$NAME" "$target" >&2
+  echo "Linked $target" >&2
+}
+
+echo "Linking $EXEC_NAME and $SHORT_NAME into $BINARY_DIR..." >&2
+link_binary "$EXEC_NAME"
+link_binary "$SHORT_NAME"
+
+# Output the location of the installed script
+# allowing calling scripts to find it
+echo "$INSTALL_DIR/$NAME"
