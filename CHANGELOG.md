@@ -12,6 +12,12 @@ to build.
 release body, and refuses a tag whose version has no section. `/release-notes:prepare <version>`
 writes one; the plugin is declared in `.claude/settings.json`.
 
+## 0.4.4 - 2026-11-03
+
+### Fixed
+
+- `uses: releasetools/cli@v0` failed with exit code 126 at "Install the release tools" for anyone who ran it after 0.4.3 was published. It installs again.
+
 ## 0.4.3 - 2026-11-03
 
 - No changes to the commands or the GitHub Action since 0.4.2.
