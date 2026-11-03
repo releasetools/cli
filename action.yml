@@ -19,5 +19,8 @@ runs:
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
+      # Run through bash rather than by path: @v<major> resolves to a commit on
+      # release/<major> written through createCommitOnBranch, which records every
+      # file as 100644, so the script carries no executable bit there.
       run: |
-        ${{ github.action_path }}/scripts/action-install.sh
+        bash "${{ github.action_path }}/scripts/action-install.sh"
