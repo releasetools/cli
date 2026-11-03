@@ -49,10 +49,15 @@ jobs:
 
       # 'uses: releasetools/cli@v<major>' resolves through the major tag, so it moves
       # here, after the release it installs exists. The tag points at a commit on
-      # release/<major> that carries the tagged tree unchanged: signed-push commits it
-      # through createCommitOnBranch, which GitHub signs, so the major tag lands on a
-      # verified commit without a GPG key on the runner. The commit's parent is the
-      # previous release, and its Source-Commit trailer names the tagged commit.
+      # release/<major> that carries the tagged tree without .github/: signed-push
+      # commits it through createCommitOnBranch, which GitHub signs, so the major tag
+      # lands on a verified commit without a GPG key on the runner. Its Source-Commit
+      # trailer names the tagged commit.
+      #
+      # GITHUB_TOKEN cannot create a ref or a commit that brings in workflow files;
+      # that takes the 'workflows' permission, which it is never granted. So neither
+      # the tree nor the branch's history may contain .github/workflows. A consumer of
+      # the action needs action.yml and scripts/, not the workflows.
       - name: Export the tagged tree
         id: major
         if: startsWith(github.ref, 'refs/tags/')
@@ -62,14 +67,15 @@ jobs:
           tree="$RUNNER_TEMP/major-tree"
           mkdir -p "$tree"
           git archive --format=tar "$GITHUB_SHA" | tar -x -C "$tree"
+          rm -rf "$tree/.github"
 
           echo "tree=$tree" >> "$GITHUB_OUTPUT"
           echo "major=${GITHUB_REF_NAME%%.*}" >> "$GITHUB_OUTPUT"
 
-      # signed-push commits onto an existing branch. A missing one is seeded from the
-      # previous release the major tag names, so the first commit on it carries the
-      # change between the two releases; a major with no tag yet starts at the tagged
-      # commit.
+      # signed-push commits onto an existing branch. A missing one starts as a root
+      # commit holding a single placeholder file, made through the Git data API so it
+      # references nothing from main. The signed commit that follows replaces the
+      # placeholder with the exported tree.
       - name: Ensure the release branch exists
         if: startsWith(github.ref, 'refs/tags/')
         env:
@@ -84,13 +90,20 @@ jobs:
             exit 0
           fi
 
-          if ! base="$(gh api "repos/${GITHUB_REPOSITORY}/commits/refs/tags/${MAJOR}" --jq .sha 2>/dev/null)"; then
-            base="$GITHUB_SHA"
-          fi
+          tree="$(jq -n --arg branch "$branch" '{tree: [{
+            path: "RELEASE_BRANCH",
+            mode: "100644",
+            type: "blob",
+            content: "\($branch) holds the published tree of each release; the next commit replaces this file.\n"
+          }]}' | gh api --method POST "repos/${GITHUB_REPOSITORY}/git/trees" --input - --jq .sha)"
+
+          commit="$(jq -n --arg tree "$tree" --arg branch "$branch" \
+            '{message: "Start \($branch)", tree: $tree, parents: []}' \
+            | gh api --method POST "repos/${GITHUB_REPOSITORY}/git/commits" --input - --jq .sha)"
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
-            -f ref="refs/heads/${branch}" -f sha="${base}" >/dev/null
-          echo "Created ${branch} at ${base}"
+            -f ref="refs/heads/${branch}" -f sha="${commit}" >/dev/null
+          echo "Created ${branch} at ${commit}"
 
       - name: Move the major tag
         if: startsWith(github.ref, 'refs/tags/')
