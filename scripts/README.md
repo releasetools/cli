@@ -36,8 +36,8 @@ scripts/tag.sh vX.Y.Z --sign --push # X, Y, Z are integers
 ```
 
 `--sign` because every release tag here carries a signature. Leave `--major` off: once the
-release exists, `release.yaml` commits the tagged tree to `release/v0` through GitHub's
-signed commit API and force-moves `v0` onto that commit, which `uses: releasetools/cli@v0`
+release exists, `release.yaml` commits the tagged tree, minus `.github/`, to `release/v0`
+through GitHub's signed commit API and force-moves `v0` onto that commit, which `uses: releasetools/cli@v0`
 resolves through.
 
 4\. Watch `release.yaml`, then `test-release.yaml`.
