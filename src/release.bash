@@ -21,12 +21,11 @@ function release::_internal_check_deps() {
 # Compared component by component as integers rather than as strings, so 0.10.0 is after
 # 0.9.0. A non-numeric component is refused rather than read as 0.
 #
-# A prerelease sorts before the release it leads to, as semver says and as
-# 'versionsort.suffix=-' already makes git's own tag sort do. Without that, a project that
-# cuts release candidates could never run these checks for the version following one:
+# A prerelease sorts before the release it leads to, as semver says. Without that, a project
+# that cuts release candidates could never run these checks for the version following one:
 # 'v2.0.0-rc1' is then the newest tag the remote carries, and 2.0.0 could not be compared
-# against it at all. Two prereleases of the same version are compared as strings, which is
-# right for 'rc1' against 'rc2' and an approximation past that.
+# against it at all. Two prereleases of the same version are compared identifier by
+# identifier, as release::_compare_prerelease says.
 function release::_is_after() {
     local a b i want_core want_pre have_core have_pre
     local -a want have
@@ -76,11 +75,78 @@ function release::_is_after() {
         return 0
     fi
 
-    if [ -n "$want_pre" ] && [ -n "$have_pre" ] && [[ "$want_pre" > "$have_pre" ]]; then
+    if [ -n "$want_pre" ] && [ -n "$have_pre" ] &&
+        [ "$(release::_compare_prerelease "$want_pre" "$have_pre")" -gt 0 ]; then
         return 0
     fi
 
     return 1
+}
+
+# Prints -1, 0 or 1 as the first prerelease is before, the same as, or after the second.
+#
+# Semver compares the dot-separated identifiers one by one: two numeric ones as numbers, a
+# numeric one before a non-numeric one, two non-numeric ones as ASCII text, and with every
+# identifier equal, the one with more of them is after. So 'rc.10' is after 'rc.2', and
+# 'rc10' is before 'rc2', because 'rc10' and 'rc2' are each one text identifier.
+function release::_compare_prerelease() {
+    local i a b
+    local -a left right
+
+    IFS='.' read -r -a left <<<"$1"
+    IFS='.' read -r -a right <<<"$2"
+
+    for ((i = 0; i < ${#left[@]} && i < ${#right[@]}; i++)); do
+        a="${left[$i]}"
+        b="${right[$i]}"
+        if [[ "$a" =~ ^[0-9]+$ ]] && [[ "$b" =~ ^[0-9]+$ ]]; then
+            if ((10#$a != 10#$b)); then
+                ((10#$a < 10#$b)) && echo -1 || echo 1
+                return
+            fi
+        elif [[ "$a" =~ ^[0-9]+$ ]]; then
+            echo -1
+            return
+        elif [[ "$b" =~ ^[0-9]+$ ]]; then
+            echo 1
+            return
+        elif [ "$a" != "$b" ]; then
+            [[ "$a" < "$b" ]] && echo -1 || echo 1
+            return
+        fi
+    done
+
+    if [ "${#left[@]}" -eq "${#right[@]}" ]; then
+        echo 0
+    elif [ "${#left[@]}" -lt "${#right[@]}" ]; then
+        echo -1
+    else
+        echo 1
+    fi
+}
+
+# Prints the newest release version the remote carries, without its 'v', ordered by
+# release::_is_after rather than by git's version sort, which puts 'rc10' after 'rc2' where
+# semver puts it before. Fails when the remote carries no release tag.
+function release::_newest_release() {
+    local remote tag version newest
+
+    if ! remote="$(git::remote)"; then
+        return 1
+    fi
+
+    newest=""
+    while read -r _ tag; do
+        version="${tag#refs/tags/v}"
+        if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            continue
+        fi
+        if [ -z "$newest" ] || release::_is_after "$version" "$newest"; then
+            newest="$version"
+        fi
+    done < <(git ls-remote --refs --tags "$remote" 'v*.*.*')
+
+    [ -n "$newest" ] && echo "$newest"
 }
 
 # Refuses a release that cannot succeed, while every reason is still free to fix.
@@ -94,10 +160,11 @@ function release::_is_after() {
 #
 # Checked in order, cheapest first:
 #
-#   1. the version is x.y.z
+#   1. the version is x.y.z, or x.y.z-<prerelease>
 #   2. the working tree is clean
 #   3. the tag is free on the remote
-#   4. the version is after the newest release tag the remote carries
+#   4. the version is after the newest release tag the remote carries, and after a
+#      prerelease of x.y.z, it is a later prerelease of x.y.z or x.y.z itself
 #   5. HEAD is on the branch, when --branch is given
 #   6. the registry answers 404 for it, when --check-registry-url is given
 #
@@ -157,8 +224,8 @@ function release::prechecks() {
 
     # 1. Shape. A release workflow triggers on a tag pattern, so a version it cannot match
     #    would merge and then publish nothing at all.
-    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "ERROR: '$version' is not x.y.z" >&2
+    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+        echo "ERROR: '$version' is not x.y.z or x.y.z-<prerelease>" >&2
         return 1
     fi
 
@@ -178,9 +245,9 @@ function release::prechecks() {
     # 4. Forward only, against the newest release tag the remote carries. A repository that
     #    has never released has none, which is read as 0.0.0.
     status=0
-    latest="$(git::latest_version 2>/dev/null)" || status=$?
+    latest="$(release::_newest_release 2>/dev/null)" || status=$?
     if [ "$status" -ne 0 ] || [ -z "$latest" ]; then
-        # git::latest_version fails both when the remote carries no release tag and when it
+        # release::_newest_release fails both when the remote carries no release tag and when it
         # could not be asked, without saying which. Step 3 asked that same remote a moment
         # ago and got an answer, so only the first is left by the time this runs. Reordering
         # these checks would make that untrue.
@@ -199,6 +266,14 @@ function release::prechecks() {
         return 1
         ;;
     esac
+
+    # A prerelease is a step towards the version it names, so what follows it is the next
+    # step or that version: after 1.0.0-rc1 come 1.0.0-rc2 and 1.0.0, never 1.0.1 or 1.1.0.
+    if [[ "$latest" == *-* ]] && [ "${version%%-*}" != "${latest%%-*}" ]; then
+        echo "ERROR: the newest release is the prerelease $latest; the next is a later" >&2
+        echo "ERROR: prerelease of ${latest%%-*} or ${latest%%-*} itself, not $version." >&2
+        return 1
+    fi
 
     # 5. On the branch, when asked. Releasing from a commit the branch never took publishes
     #    something no review ever saw.
