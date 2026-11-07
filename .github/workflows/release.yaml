@@ -107,7 +107,7 @@ jobs:
 
       - name: Move the major tag
         if: startsWith(github.ref, 'refs/tags/')
-        uses: releasetools/actions/signed-push@05f197a5d5ed9b47c306389884b7cf79542132db # v0.9.1
+        uses: releasetools/actions/signed-push@76cf0826db3a16eed6baa02d03548628e7a32519 # v0.10.0
         with:
           source-dir: ${{ steps.major.outputs.tree }}
           target-repo: ${{ github.repository }}
