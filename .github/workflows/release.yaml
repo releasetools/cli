@@ -36,7 +36,7 @@ jobs:
           bash dist/releasetools.bash changelog::section "${GITHUB_REF_NAME#v}" >RELEASE_NOTES.md
 
       - name: Release GHA
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: RELEASE_NOTES.md
@@ -107,7 +107,7 @@ jobs:
 
       - name: Move the major tag
         if: startsWith(github.ref, 'refs/tags/')
-        uses: releasetools/actions/signed-push@05f197a5d5ed9b47c306389884b7cf79542132db # v0.9.1
+        uses: releasetools/actions/signed-push@9828828b39bb2261f95b6f45749fb96ce22c9d2d # v0.12.1
         with:
           source-dir: ${{ steps.major.outputs.tree }}
           target-repo: ${{ github.repository }}
