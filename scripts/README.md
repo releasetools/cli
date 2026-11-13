@@ -17,14 +17,14 @@ runs inside `tag.sh` and refuses to tag until the two agree.
 2\. Write the changelog entry.
 
 ```shell
-/release-notes:prepare X.Y.Z
+/release:prepare X.Y.Z
 ```
 
 That rules on every commit since the previous tag and writes the entry into
 [CHANGELOG.md](../CHANGELOG.md) under `## X.Y.Z - <date>`. The plugin is declared in
 `.claude/settings.json`; installing it by hand is
 `claude plugin marketplace add releasetools/agent-plugins` then
-`claude plugin install release-notes@release-tools`.
+`claude plugin install release@release-tools`.
 
 `release.yaml` reads that section back out as the GitHub release body and fails when the
 version has no section, so this is not optional.
